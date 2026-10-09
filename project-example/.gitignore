@@ -1,0 +1,8 @@
+node_modules/
+
+# .SEditor/ is /seditor's OUTPUT, not source. It is committed here on purpose so the
+# example shows exactly what the skill produces. Uncomment to treat it as build output.
+# .SEditor/
+
+# pi-lens cache
+.pi-lens-cache/

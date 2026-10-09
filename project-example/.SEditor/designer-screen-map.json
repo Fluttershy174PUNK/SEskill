@@ -1,0 +1,287 @@
+{
+  "version": 1,
+  "meta": {
+    "name": "designer-screen-map",
+    "app": "SEditor",
+    "updated": "2026-10-08T19:50:38.000Z"
+  },
+  "nodes": [
+    {
+      "id": "s1",
+      "type": "shape",
+      "position": {
+        "x": 0,
+        "y": 200
+      },
+      "width": 96,
+      "height": 96,
+      "data": {
+        "shape": "circle",
+        "label": "Запуск",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "s2",
+      "type": "shape",
+      "position": {
+        "x": 180,
+        "y": 208
+      },
+      "width": 160,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "Экран входа",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "s3",
+      "type": "shape",
+      "position": {
+        "x": 420,
+        "y": 208
+      },
+      "width": 160,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "Экран регистрации",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "s4",
+      "type": "shape",
+      "position": {
+        "x": 180,
+        "y": 400
+      },
+      "width": 160,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "Экран 2FA",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "s5",
+      "type": "shape",
+      "position": {
+        "x": 660,
+        "y": 208
+      },
+      "width": 160,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "Список задач",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "s6",
+      "type": "shape",
+      "position": {
+        "x": 900,
+        "y": 208
+      },
+      "width": 160,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "Настройки",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "s7",
+      "type": "shape",
+      "position": {
+        "x": 420,
+        "y": 400
+      },
+      "width": 160,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "Запрос сброса",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "s8",
+      "type": "shape",
+      "position": {
+        "x": 660,
+        "y": 400
+      },
+      "width": 160,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "Новый пароль",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "n_label",
+      "type": "shape",
+      "position": {
+        "x": 660,
+        "y": 100
+      },
+      "width": 140,
+      "height": 32,
+      "data": {
+        "shape": "label",
+        "label": "после успешного входа",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "s1",
+      "target": "s2",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e2",
+      "source": "s2",
+      "target": "s3",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "нет аккаунта",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e3",
+      "source": "s2",
+      "target": "s5",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "data": {
+        "label": "2FA пройдена",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e4",
+      "source": "s2",
+      "target": "s4",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "data": {
+        "label": "нужен код",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e5",
+      "source": "s4",
+      "target": "s5",
+      "sourceHandle": "right",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "data": {
+        "label": "код верный",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e6",
+      "source": "s5",
+      "target": "s6",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e7",
+      "source": "s2",
+      "target": "s7",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "data": {
+        "label": "забыл пароль",
+        "dash": "dotted",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e8",
+      "source": "s7",
+      "target": "s8",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e9",
+      "source": "s8",
+      "target": "s2",
+      "sourceHandle": "top",
+      "targetHandle": "right",
+      "type": "smoothstep",
+      "data": {
+        "label": "пароль обновлён",
+        "dash": "dashed",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    }
+  ],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  }
+}

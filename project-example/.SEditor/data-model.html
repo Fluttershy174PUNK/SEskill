@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEditor — data-model</title>
+<meta name="seditor-launcher" content="embed-v1">
+<meta name="seditor-editor-sha256" content="4230a2e746736e26920e42bb7ecb7054cb5eb831626755828da2e8f2120279fc">
+<style>
+  html,body{height:100%;margin:0;background:#0b0d14;color:#f4f6ff;font:13px/1.6 ui-monospace,monospace}
+  .wrap{display:flex;height:100%;align-items:center;justify-content:center;padding:16px;text-align:center}
+  .hint{max-width:min(620px,calc(100vw - 32px));padding:12px 16px;background:#161a28;border:2px solid #39405e;color:#aab2d0}
+  code{color:#f7d51d;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hint">
+    Открываю схему <code>../data-model.json</code> в SEditor…<br>
+    Если редактор не открылся, откройте <code>app/editor.html</code> вручную,<br>
+    либо запустите из корня проекта: <code>node .SEditor/app/server.js</code>
+  </div>
+</div>
+<!-- Данные схемы лежат внутри ярлыка: так редактор открывается двойным кликом
+     (file://) без локального сервера. Ярлык перегенерируется при каждой записи схемы. -->
+<script type="application/json" id="seditor-schema">{"version":1,"meta":{"name":"data-model","app":"SEditor","updated":"2026-10-08T19:50:38.000Z"},"nodes":[{"id":"z1","type":"shape","position":{"x":-40,"y":-40},"width":980,"height":440,"data":{"shape":"zone","label":"Хранилище","labelPos":"top","desc":"","border":"dashed","stroke":"#5c6b7a","fill":"#00000000"}},{"id":"t_users","type":"shape","position":{"x":0,"y":40},"width":320,"height":140,"data":{"shape":"table","label":"","labelPos":"inside","desc":"","cols":3,"rows":3,"header":true,"cells":{"0,0":"email","0,1":"password","0,2":"twoFactor","1,0":"ada@x.io","1,1":"hash","1,2":"true","2,0":"bob@x.io","2,1":"hash","2,2":"false"},"zones":["z1"]}},{"id":"t_tasks","type":"shape","position":{"x":520,"y":40},"width":380,"height":140,"data":{"shape":"table","label":"","labelPos":"inside","desc":"","cols":4,"rows":2,"header":true,"cells":{"0,0":"id","0,1":"email","0,2":"title","0,3":"done","1,0":"1","1,1":"ada@x.io","1,2":"Задача","1,3":"false"},"zones":["z1"]}}],"edges":[{"id":"e1","source":"t_users","target":"t_tasks","sourceHandle":"right","targetHandle":"left","type":"straight","data":{"label":"1 : N","dash":"solid","marker":"arrow","arrow":"end"}}],"viewport":{"x":0,"y":0,"zoom":1}}</script>
+<script>
+  (function () {
+    var holder = document.getElementById('seditor-schema');
+    location.replace(
+      "app/editor.html" +
+      '#d=' + encodeURIComponent(holder.textContent) +
+      '&p=' + encodeURIComponent("../data-model.json")
+    );
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEditor — __SCHEME_NAME__</title>
+<meta name="seditor-launcher" content="embed-v1">
+<meta name="seditor-editor-sha256" content="__EDITOR_SHA256__">
+<style>
+  html,body{height:100%;margin:0;background:#0b0d14;color:#f4f6ff;font:13px/1.6 ui-monospace,monospace}
+  .wrap{display:flex;height:100%;align-items:center;justify-content:center;padding:16px;text-align:center}
+  .hint{max-width:min(620px,calc(100vw - 32px));padding:12px 16px;background:#161a28;border:2px solid #39405e;color:#aab2d0}
+  code{color:#f7d51d;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hint">
+    Открываю схему <code>__SCHEME_PATH__</code> в SEditor…<br>
+    Если редактор не открылся, откройте <code>__EDITOR_REL__</code> вручную,<br>
+    либо запустите из корня проекта: <code>__SERVER_COMMAND__</code>
+  </div>
+</div>
+<!-- Данные схемы лежат внутри ярлыка: так редактор открывается двойным кликом
+     (file://) без локального сервера. Ярлык перегенерируется при каждой записи схемы. -->
+<script type="application/json" id="seditor-schema">__SCHEME_JSON__</script>
+<script>
+  (function () {
+    var holder = document.getElementById('seditor-schema');
+    location.replace(
+      __EDITOR_URL__ +
+      '#d=' + encodeURIComponent(holder.textContent) +
+      '&p=' + encodeURIComponent(__SCHEME_PATH_PARAM__)
+    );
+  })();
+</script>
+</body>
+</html>

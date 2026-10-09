@@ -1,0 +1,53 @@
+{
+  "skill_name": "seditor",
+  "evals": [
+    {
+      "id": "logic-explicit",
+      "prompt": "/seditor map login, password reset and 2FA flows",
+      "expected_output": "One valid logic schema and same-basename HTML path launcher in .SEditor; run the validator and explain backend launch.",
+      "assertions": ["Schema validates as SEditor v1", "Launcher is same-basename and references ../<slug>.json", "Launcher contains no schema JSON snapshot", "User is told how to launch local backend"]
+    },
+    {
+      "id": "screens-casual-ru",
+      "prompt": "Нарисуй карту экранов приложения и переходов между ними",
+      "expected_output": "A designer schema that describes discovered screens and transitions plus its launcher.",
+      "assertions": ["Inspects project routes/UI before drafting", "Writes a designer-*.json and paired .html", "Validates the schema"]
+    },
+    {
+      "id": "implicit-visual-plan",
+      "prompt": "My team needs a visual map of the API modules and which services call each other.",
+      "expected_output": "A code architecture schema based on the existing project.",
+      "assertions": ["Recognizes the request as a schema request", "Uses repository evidence instead of inventing modules", "Writes matching JSON/HTML pair"]
+    },
+    {
+      "id": "no-type-no-overwrite",
+      "prompt": "/seditor",
+      "expected_output": "Ask which schema type/topic to produce and do not create files yet.",
+      "assertions": ["Asks one clear type/topic question", "Creates no speculative schema or launcher"]
+    },
+    {
+      "id": "protect-existing-human-schema",
+      "prompt": "Create a data model for this project; .SEditor/data-model.json already exists and has manual edits.",
+      "expected_output": "Ask before overwriting the existing schema or select a new non-conflicting slug.",
+      "assertions": ["Does not overwrite existing JSON or launcher without permission", "Keeps the existing editor bundle intact"]
+    },
+    {
+      "id": "agent-revision-keeps-launcher",
+      "prompt": "Update the existing logic diagram to include account lockout after 5 failed attempts.",
+      "expected_output": "Update the JSON in place; its existing HTML launcher continues pointing to that path.",
+      "assertions": ["Updates existing schema rather than silently changing slug", "Does not embed a JSON snapshot or regenerate launcher for content-only edit", "Validates the edited schema"]
+    },
+    {
+      "id": "stale-vendored-editor",
+      "prompt": "Add a deployment schema to a project whose .SEditor/app/version.json differs from the skill bundle.",
+      "expected_output": "Synchronize the bundled editor files as one version before creating the launcher.",
+      "assertions": ["Detects manifest/version mismatch", "Updates the coherent editor bundle", "Creates path-based launcher and validates result"]
+    },
+    {
+      "id": "near-miss-unrelated-html",
+      "prompt": "Fix the mobile CSS layout in index.html; do not create a diagram.",
+      "expected_output": "Handle as a normal UI fix, not a schema-generation task.",
+      "assertions": ["Does not generate a schema or launcher"]
+    }
+  ]
+}

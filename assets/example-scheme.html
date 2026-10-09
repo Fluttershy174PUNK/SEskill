@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SEditor — example-flow</title>
+<meta name="seditor-launcher" content="embed-v1">
+<meta name="seditor-editor-sha256" content="4230a2e746736e26920e42bb7ecb7054cb5eb831626755828da2e8f2120279fc">
+<style>
+  html,body{height:100%;margin:0;background:#0b0d14;color:#f4f6ff;font:13px/1.6 ui-monospace,monospace}
+  .wrap{display:flex;height:100%;align-items:center;justify-content:center;padding:16px;text-align:center}
+  .hint{max-width:min(620px,calc(100vw - 32px));padding:12px 16px;background:#161a28;border:2px solid #39405e;color:#aab2d0}
+  code{color:#f7d51d;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hint">
+    Открываю схему <code>../assets/example-scheme.json</code> в SEditor…<br>
+    Если редактор не открылся, откройте <code>../app/editor.html</code> вручную,<br>
+    либо запустите из корня проекта: <code>node .SEditor/app/server.js</code>
+  </div>
+</div>
+<!-- Данные схемы лежат внутри ярлыка: так редактор открывается двойным кликом
+     (file://) без локального сервера. Ярлык перегенерируется при каждой записи схемы. -->
+<script type="application/json" id="seditor-schema">{"version":1,"meta":{"name":"example-flow","app":"SEditor","updated":"2026-10-07T19:17:43.816Z"},"nodes":[{"id":"n1","type":"shape","position":{"x":0,"y":0},"width":160,"height":80,"data":{"shape":"rect","label":"Начало","labelPos":"inside","desc":"точка входа","zones":[],"levels":[]}},{"id":"n2","type":"shape","position":{"x":0,"y":220},"width":112,"height":112,"data":{"shape":"diamond","label":"Условие","labelPos":"inside","desc":"","zones":[],"levels":[]}},{"id":"n3","type":"shape","position":{"x":300,"y":240},"width":160,"height":80,"data":{"shape":"rect","label":"Действие","labelPos":"inside","desc":"","zones":["z1"],"levels":[]}},{"id":"n4","type":"shape","position":{"x":300,"y":40},"width":96,"height":96,"data":{"shape":"circle","label":"Конец","labelPos":"inside","desc":"","zones":["z1"],"levels":[]}},{"id":"z1","type":"zone","position":{"x":240,"y":-20},"width":320,"height":400,"zIndex":-1,"data":{"shape":"zone","label":"Зона обработки","labelPos":"top","desc":"","border":"dashed","fill":"#00000000","stroke":"#5c6b7a"}},{"id":"l1","type":"shape","position":{"x":-120,"y":150},"width":400,"height":14,"data":{"shape":"level","label":"Зона обработки","labelPos":"top","desc":"","stroke":"#5c6b7a","dash":"dashed"}},{"id":"t1","type":"shape","position":{"x":660,"y":60},"width":280,"height":140,"data":{"shape":"table","label":"","labelPos":"inside","desc":"","cols":3,"rows":2,"header":true,"cells":{"0,0":"id","0,1":"имя","0,2":"статус","1,0":"1","1,1":"Задача","1,2":"готово"},"zones":[],"levels":[]}}],"edges":[{"id":"e1","source":"n1","target":"n2","sourceHandle":"bottom","targetHandle":"top","type":"straight","data":{"label":"","dash":"solid","marker":"arrow","arrow":"end","width":2,"stroke":"#e6eef5"}},{"id":"e2","source":"n2","target":"n3","sourceHandle":"right","targetHandle":"left","type":"smoothstep","data":{"label":"да","dash":"solid","marker":"triangle","arrow":"end","width":2,"stroke":"#e6eef5"}},{"id":"e3","source":"n2","target":"n4","sourceHandle":"top","targetHandle":"bottom","type":"straight","data":{"label":"нет","dash":"dashed","marker":"arrow","arrow":"both","width":2,"stroke":"#e6eef5"}}],"viewport":{"x":0,"y":0,"zoom":1}}</script>
+<script>
+  (function () {
+    var holder = document.getElementById('seditor-schema');
+    location.replace(
+      "../app/editor.html" +
+      '#d=' + encodeURIComponent(holder.textContent) +
+      '&p=' + encodeURIComponent("../assets/example-scheme.json")
+    );
+  })();
+</script>
+</body>
+</html>

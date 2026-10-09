@@ -1,0 +1,310 @@
+{
+  "version": 1,
+  "meta": {
+    "name": "logic-auth-flow",
+    "app": "SEditor",
+    "updated": "2026-10-08T19:50:38.000Z"
+  },
+  "nodes": [
+    {
+      "id": "z1",
+      "type": "shape",
+      "position": {
+        "x": -40,
+        "y": 20
+      },
+      "width": 900,
+      "height": 620,
+      "data": {
+        "shape": "zone",
+        "label": "Аутентификация и сессии",
+        "labelPos": "top",
+        "desc": "",
+        "border": "dashed",
+        "stroke": "#5c6b7a",
+        "fill": "#00000000"
+      }
+    },
+    {
+      "id": "n1",
+      "type": "shape",
+      "position": {
+        "x": 0,
+        "y": 240
+      },
+      "width": 96,
+      "height": 96,
+      "data": {
+        "shape": "circle",
+        "label": "Старт\\. Онлайн-аккаунт не существует.",
+        "labelPos": "inside",
+        "desc": "",
+        "zones": [
+          "z1"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "type": "shape",
+      "position": {
+        "x": 160,
+        "y": 248
+      },
+      "width": 180,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "POST /register (email, password)",
+        "labelPos": "inside",
+        "desc": "",
+        "zones": [
+          "z1"
+        ]
+      }
+    },
+    {
+      "id": "n3",
+      "type": "shape",
+      "position": {
+        "x": 420,
+        "y": 248
+      },
+      "width": 180,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "POST /login (email, password)",
+        "labelPos": "inside",
+        "desc": "",
+        "zones": [
+          "z1"
+        ]
+      }
+    },
+    {
+      "id": "n4",
+      "type": "shape",
+      "position": {
+        "x": 680,
+        "y": 232
+      },
+      "width": 112,
+      "height": 112,
+      "data": {
+        "shape": "diamond",
+        "label": "Нужна 2FA?",
+        "labelPos": "inside",
+        "desc": "",
+        "zones": [
+          "z1"
+        ]
+      }
+    },
+    {
+      "id": "n5",
+      "type": "shape",
+      "position": {
+        "x": 660,
+        "y": 60
+      },
+      "width": 180,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "POST /2fa (code=0000)",
+        "labelPos": "inside",
+        "desc": "",
+        "zones": [
+          "z1"
+        ]
+      }
+    },
+    {
+      "id": "n6",
+      "type": "shape",
+      "position": {
+        "x": 920,
+        "y": 52
+      },
+      "width": 96,
+      "height": 96,
+      "data": {
+        "shape": "circle",
+        "label": "Сессия выдана",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "n7",
+      "type": "shape",
+      "position": {
+        "x": 688,
+        "y": 500
+      },
+      "width": 96,
+      "height": 96,
+      "data": {
+        "shape": "circle",
+        "label": "400 bad_credentials",
+        "labelPos": "inside",
+        "desc": "",
+        "zones": [
+          "z1"
+        ]
+      }
+    },
+    {
+      "id": "n8",
+      "type": "shape",
+      "position": {
+        "x": 420,
+        "y": 720
+      },
+      "width": 180,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "POST /reset/req (email)",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    },
+    {
+      "id": "n9",
+      "type": "shape",
+      "position": {
+        "x": 680,
+        "y": 720
+      },
+      "width": 200,
+      "height": 80,
+      "data": {
+        "shape": "rect",
+        "label": "POST /reset/ok (code, password)",
+        "labelPos": "inside",
+        "desc": ""
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "n1",
+      "target": "n2",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e2",
+      "source": "n2",
+      "target": "n3",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e3",
+      "source": "n3",
+      "target": "n4",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e4",
+      "source": "n4",
+      "target": "n5",
+      "sourceHandle": "top",
+      "targetHandle": "bottom",
+      "type": "straight",
+      "data": {
+        "label": "да",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e5",
+      "source": "n5",
+      "target": "n6",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e6",
+      "source": "n4",
+      "target": "n7",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "straight",
+      "data": {
+        "label": "нет",
+        "dash": "dashed",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e7",
+      "source": "n3",
+      "target": "n8",
+      "sourceHandle": "bottom",
+      "targetHandle": "top",
+      "type": "smoothstep",
+      "data": {
+        "label": "забыл пароль",
+        "dash": "dotted",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    },
+    {
+      "id": "e8",
+      "source": "n8",
+      "target": "n9",
+      "sourceHandle": "right",
+      "targetHandle": "left",
+      "type": "straight",
+      "data": {
+        "label": "",
+        "dash": "solid",
+        "marker": "arrow",
+        "arrow": "end"
+      }
+    }
+  ],
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  }
+}

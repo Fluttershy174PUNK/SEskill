@@ -1,0 +1,5 @@
+{
+  "ignore": {
+    "patterns": ["**/editor.html", "**/server.js", "**/.SEditor/**"]
+  }
+}

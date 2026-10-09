@@ -1,0 +1,12 @@
+[
+  {"id":"explicit-en","query":"/seditor map registration and password reset flows","should_trigger":true},
+  {"id":"explicit-ru","query":"/seditor нарисуй архитектуру моего приложения","should_trigger":true},
+  {"id":"casual-screen","query":"Нарисуй карту экранов и переходов в приложении","should_trigger":true},
+  {"id":"implicit-api","query":"My team needs a visual map showing API modules and what depends on each other","should_trigger":true},
+  {"id":"misspelled","query":"plz diagram the auth flow and include the retry paths","should_trigger":true},
+  {"id":"no-type","query":"/seditor","should_trigger":true},
+  {"id":"existing-scheme","query":"Update my existing visual schema with an account lockout branch","should_trigger":true},
+  {"id":"yaml-near-miss","query":"Convert this JSON schema file into YAML","should_trigger":false},
+  {"id":"ui-css-near-miss","query":"Fix the mobile CSS in index.html; don't make diagrams","should_trigger":false},
+  {"id":"architecture-explanation","query":"Explain the architecture in prose, but do not create any files","should_trigger":false}
+]

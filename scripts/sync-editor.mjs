@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+// Install/update the managed .SEditor/app runtime files as one verified release.
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const appDir = path.join(skillDir, 'app');
+
+export async function syncEditor(projectRoot, { sourceAppDir = appDir } = {}) {
+  let manifest;
+  try {
+    manifest = JSON.parse(await readFile(path.join(sourceAppDir, 'version.json'), 'utf8'));
+  } catch (error) {
+    throw new Error(`invalid bundled app/version.json: ${error.message}`);
+  }
+  if (manifest.name !== 'SEditor' || manifest.schemaVersion !== 1 || manifest.launcherFormat !== 'embed-v1') {
+    throw new Error('unsupported SEditor app/version.json contract');
+  }
+  const targetDir = path.resolve(projectRoot, '.SEditor/app');
+  let existed = false;
+  try { existed = JSON.parse(await readFile(path.join(targetDir, 'version.json'), 'utf8')).version === manifest.version; } catch {}
+  if (!manifest.files || typeof manifest.files !== 'object') throw new Error('editor version manifest has no file checksums');
+  await mkdir(targetDir, { recursive: true });
+  const installed = [];
+  for (const [file, expectedHash] of Object.entries(manifest.files)) {
+    if (!['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'version.test.mjs', 'editor.test.mjs'].includes(file)) {
+      throw new Error(`refusing to install unrecognized runtime file: ${file}`);
+    }
+    const source = await readFile(path.join(sourceAppDir, file));
+    const actualHash = createHash('sha256').update(source).digest('hex');
+    if (actualHash !== expectedHash) throw new Error(`skill editor bundle checksum failed: ${file}`);
+    const current = await readFile(path.join(targetDir, file)).catch(() => null);
+    if (!current?.equals(source)) await writeFile(path.join(targetDir, file), source);
+    installed.push(file);
+  }
+  const runtimeFiles = ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js'];
+  const managedFiles = [...runtimeFiles, 'editor.test.mjs', 'version.test.mjs'];
+  if (runtimeFiles.some((file) => !installed.includes(file))) throw new Error('editor manifest omits a required runtime file');
+  for (const file of await readdir(targetDir)) {
+    if (managedFiles.includes(file) && !installed.includes(file)) await rm(path.join(targetDir, file));
+  }
+  const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
+  const oldManifest = await readFile(path.join(targetDir, 'version.json'), 'utf8').catch(() => null);
+  if (oldManifest !== manifestText) await writeFile(path.join(targetDir, 'version.json'), manifestText);
+  return { targetDir, version: manifest.version, files: Object.keys(manifest.files), changed: !existed };
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const projectRoot = process.argv[2] || process.cwd();
+  try {
+    const result = await syncEditor(projectRoot);
+    console.log(`SEditor ${result.version} installed: ${result.targetDir}`);
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+}
