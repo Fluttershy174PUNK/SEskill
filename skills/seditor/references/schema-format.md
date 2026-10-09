@@ -1,12 +1,11 @@
 # SEditor schema format (reference)
 
-> Loaded on demand by the `seditor` skill. Read this before writing `.SEditor/<name>.json`.
-> Mirrors the format the bundled `app/editor.html` actually reads and writes
-> (upstream: <https://github.com/Fluttershy174PUNK/SEditor>).
+> The canonical description of the schema the editor reads and writes. `SEditor/README.md`
+> carries only a short example; this file wins wherever they disagree.
 >
-> Everything below was verified against `app/editor.html` in a browser. Where the
-> upstream README is vaguer, this file wins. If the editor is updated, re-verify
-> with `scripts/validate-scheme.mjs` — it encodes the same rules.
+> Everything below was verified against `app/editor.html` in a browser. If the editor is
+> updated, re-verify with `scripts/validate-scheme.mjs` in the `seditor` skill — it encodes
+> the same rules.
 
 ## Top-level shape
 
@@ -158,7 +157,7 @@ the diagram if the lowest group needs a lane too. Size zones generously so they 
 overlap their children, then verify with:
 
 ```bash
-node scripts/validate-scheme.mjs .SEditor/*.json
+node <skill-dir>/scripts/validate-scheme.mjs .SEditor/*.json
 ```
 
 The validator flags every declared-but-mismatched link as a warning.
@@ -245,7 +244,7 @@ children inside it:
 ## Validate before you hand off
 
 ```bash
-node scripts/validate-scheme.mjs .SEditor/*.json
+node <skill-dir>/scripts/validate-scheme.mjs .SEditor/*.json
 ```
 
 It checks JSON validity, id uniqueness, shape/handle/enum vocabularies, table cell

@@ -56,6 +56,13 @@ assert.deepEqual(bundled, source, 'vendored editor version mismatch');
 console.log(`ok    editor bundle manifest (${Object.keys(bundled.files).length} checksums)`);
 NODE
 
+# 1b. The schema-format reference is vendored from the editor repo verbatim.
+if cmp -s "$SKILL/references/schema-format.md" "$SEDITOR_SRC/docs/schema-format.md"; then
+  pass "schema-format.md vendored verbatim"
+else
+  bad "schema-format.md drifted from $SEDITOR_SRC/docs/schema-format.md"
+fi
+
 # 2. Use the reference Agent Skills validator on the payload package only.
 if command -v skills-ref >/dev/null 2>&1 || command -v uvx >/dev/null 2>&1; then
   skill_tmp=$(mktemp -d)
