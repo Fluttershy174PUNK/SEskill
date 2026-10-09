@@ -42,7 +42,7 @@ try {
   assert.notEqual(rebuilt, before);
   run([bundledSchema, expectedLauncherPath, join(bundledEditor, 'editor.html'), '--check']);
   const editor = (relative) => readFileSync(join(repoRoot, 'SEditor/app', relative));
-  for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'editor.test.mjs']) {
+  for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js']) {
     assert.deepEqual(readFileSync(join(bundledEditor, file)), editor(file), `bundled SEditor differs: ${file}`);
   }
   console.log('shortcut.test.mjs: ok');

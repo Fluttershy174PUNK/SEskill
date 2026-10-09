@@ -25,7 +25,7 @@ export async function syncEditor(projectRoot, { sourceAppDir = appDir } = {}) {
   await mkdir(targetDir, { recursive: true });
   const installed = [];
   for (const [file, expectedHash] of Object.entries(manifest.files)) {
-    if (!['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'version.test.mjs', 'editor.test.mjs'].includes(file)) {
+    if (!['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js'].includes(file)) {
       throw new Error(`refusing to install unrecognized runtime file: ${file}`);
     }
     const source = await readFile(path.join(sourceAppDir, file));
@@ -36,6 +36,8 @@ export async function syncEditor(projectRoot, { sourceAppDir = appDir } = {}) {
     installed.push(file);
   }
   const runtimeFiles = ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js'];
+  // editor.test.mjs / version.test.mjs когда-то ставились сюда — теперь это только
+  // тесты репозитория редактора. managedFiles шире installed: старые установки чистим.
   const managedFiles = [...runtimeFiles, 'editor.test.mjs', 'version.test.mjs'];
   if (runtimeFiles.some((file) => !installed.includes(file))) throw new Error('editor manifest omits a required runtime file');
   for (const file of await readdir(targetDir)) {

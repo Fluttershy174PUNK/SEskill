@@ -44,7 +44,7 @@ const tests = async (name, fn) => {
   }
 };
 
-const RUNTIME_FILES = ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'editor.test.mjs', 'version.test.mjs'];
+const RUNTIME_FILES = ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js'];
 
 async function unusedPort() {
   const socket = net.createServer();

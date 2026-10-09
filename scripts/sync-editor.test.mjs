@@ -17,10 +17,15 @@ try {
   await writeFile(path.join(staleApp, 'editor.html'), 'old version');
 
   const first = await syncEditor(project);
-  assert.equal(first.version, '0.3.1');
+  const manifest = JSON.parse(await readFile(path.join(skillDir, 'app', 'version.json'), 'utf8'));
+  assert.equal(first.version, manifest.version);
   assert.equal(first.changed, true);
   for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'version.json']) {
     assert.deepEqual(await readFile(path.join(staleApp, file)), await readFile(path.join(skillDir, 'app', file)));
+  }
+  // Тесты бандла — только в репозитории редактора, в чужой проект не ставятся.
+  for (const file of ['editor.test.mjs', 'version.test.mjs']) {
+    await assert.rejects(readFile(path.join(staleApp, file)), /ENOENT/, `${file} must not be installed into a project`);
   }
   assert.equal(await readFile(path.join(staleApp, 'old-editor.js'), 'utf8'), 'user-owned file', 'do not delete unrecognized user files');
   const installedManifest = await readFile(path.join(staleApp, 'version.json'), 'utf8');

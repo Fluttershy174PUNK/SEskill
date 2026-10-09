@@ -160,7 +160,7 @@ async function api(req, res, url) {
     if (!manifest || manifest.name !== 'SEditor' || !manifest.files) return json(res, 500, { error: 'invalid SEditor runtime manifest' });
     const files = {};
     for (const [file, expected] of Object.entries(manifest.files)) {
-      if (!['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'editor.test.mjs', 'version.test.mjs'].includes(file)) {
+      if (!['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js'].includes(file)) {
         return json(res, 500, { error: `unexpected runtime file: ${file}` });
       }
       const data = await fsp.readFile(path.join(APP, file));

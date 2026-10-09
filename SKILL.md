@@ -28,12 +28,13 @@ For each schema, in the project's `.SEditor/` folder (create it if missing):
 
 ```text
 .SEditor/
-├── app/                      # the editor itself, copied verbatim from this skill
-│   ├── editor.html
-│   ├── server.js             # API resolves the live path on every open
+├── app/                      # рантайм редактора: копия SEditor/app, без конфигов сборки
+│   ├── editor.html           # собранный в один файл редактор (не править руками)
+│   ├── server.js             # опциональный backend: /api/*, листинг диска
 │   ├── create-shortcut.mjs   # генерирует ярлык с данными схемы внутри
-│   ├── launcher.js           # общий рендер ярлыка (Node + браузер)
-│   └── PATCH.md              # bundled editor/launcher compatibility
+│   ├── launcher.js           # общий рендер ярлыка (Node и браузер)
+│   ├── shortcut.html         # шаблон ярлыка
+│   └── version.json          # sha256 каждого файла рантайма
 ├── <type>-<topic>.json       # the schema
 └── <type>-<topic>.html       # ярлык: открывает схему двойным кликом, без сервера
 ```

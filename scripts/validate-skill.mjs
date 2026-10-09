@@ -40,7 +40,7 @@ try { manifest = JSON.parse(await readFile(path.join(skillDir, 'app/version.json
   manifest = { files: {} };
 }
 check(manifest.name === 'SEditor' && manifest.schemaVersion === 1 && manifest.launcherFormat === 'embed-v1', 'editor manifest contract mismatch');
-for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'editor.test.mjs', 'version.test.mjs']) {
+for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js']) {
   const bundled = await readFile(path.join(skillDir, 'app', file));
   const hash = createHash('sha256').update(bundled).digest('hex');
   check(manifest.files[file] === hash, `SEditor version manifest checksum mismatch: ${file}`);

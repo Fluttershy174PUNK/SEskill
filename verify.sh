@@ -58,7 +58,7 @@ else bad "SKILL.md is $lines lines (>= 500, split it)"; fi
 
 # 5. Every bundled asset and script is actually referenced from the skill.
 for f in references/schema-format.md assets/example-scheme.json \
-         scripts/validate-scheme.mjs scripts/validate-scheme.test.mjs scripts/create-shortcut.mjs scripts/shortcut.test.mjs scripts/system.test.mjs scripts/validate-skill.mjs scripts/sync-editor.mjs scripts/sync-editor.test.mjs scripts/skill.integration.test.mjs scripts/run-evals.mjs scripts/grade-evals.mjs evals/evals.json evals/eval_queries.json evals/README.md app/PATCH.md app/version.json AGENTS.md; do
+         scripts/validate-scheme.mjs scripts/validate-scheme.test.mjs scripts/create-shortcut.mjs scripts/shortcut.test.mjs scripts/system.test.mjs scripts/validate-skill.mjs scripts/sync-editor.mjs scripts/sync-editor.test.mjs scripts/skill.integration.test.mjs scripts/run-evals.mjs scripts/grade-evals.mjs evals/evals.json evals/eval_queries.json evals/README.md app/version.json AGENTS.md; do
   if grep -q "$(basename "$f")" SKILL.md README.md evals/README.md || [[ "$f" == scripts/* ]]; then
     pass "referenced: $f"
   else
