@@ -4,7 +4,7 @@
 filesystem/backend suite, from the repository root use:
 
 ```bash
-node scripts/run-evals.mjs
+node tests/run-evals.mjs
 ```
 
 The runner exercises schema creation, embedded-data launchers, live schema revisions, validation,
@@ -16,10 +16,10 @@ To grade real agent-produced output, run each prompt in a fresh session, save ge
 under `<run-dir>/<eval-id>/outputs/`, then grade objective schema/launcher invariants:
 
 ```bash
-node scripts/grade-evals.mjs <run-dir>
+node tests/grade-evals.mjs <run-dir>
 ```
 
 `eval_queries.json` contains positive and near-miss prompts for trigger evaluation. Triggering is
 model/client-dependent; the repository's deterministic Node tests cannot claim an LLM invoked the
 skill. Run those queries in fresh sessions with skill discovery enabled/disabled and record whether
-`seditor/SKILL.md` loaded.
+`skills/seditor/SKILL.md` loaded.

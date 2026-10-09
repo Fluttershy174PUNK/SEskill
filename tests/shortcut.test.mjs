@@ -7,8 +7,8 @@ import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-const skillDir = resolve(fileURLToPath(new URL('..', import.meta.url)));
-const repoRoot = resolve(skillDir, '..');
+const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const skillDir = join(repoRoot, 'skills/seditor');
 const temp = mkdtempSync(join(tmpdir(), 'seditor-shortcut-'));
 try {
   const schema = { version: 1, meta: { name: 'test-flow' }, nodes: [], edges: [] };
@@ -41,7 +41,10 @@ try {
   assert.match(rebuilt, /changed/, 'regeneration picks up the new schema');
   assert.notEqual(rebuilt, before);
   run([bundledSchema, expectedLauncherPath, join(bundledEditor, 'editor.html'), '--check']);
-  const editor = (relative) => readFileSync(join(repoRoot, 'SEditor/app', relative));
+  const editorRepo = process.env.SEDITOR_ROOT
+    ? resolve(process.env.SEDITOR_ROOT)
+    : resolve(repoRoot, '..', 'SEditor');
+  const editor = (relative) => readFileSync(join(editorRepo, 'app', relative));
   for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js']) {
     assert.deepEqual(readFileSync(join(bundledEditor, file)), editor(file), `bundled SEditor differs: ${file}`);
   }

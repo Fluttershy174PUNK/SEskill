@@ -11,7 +11,7 @@ license: MIT
 compatibility: Node.js >= 18 for the bundled local editor backend.
 metadata:
   author: Fluttershy174PUNK
-  version: "0.3.1"
+  version: "0.4.0"
   upstream_editor: "https://github.com/Fluttershy174PUNK/SEditor"
   allowed_harnesses: "pi, claude-code, codex, opencode"
   license_file: "LICENSE"
@@ -77,11 +77,10 @@ same type from overwriting each other. Set `meta.name` to the same string.
 ### Repository support files (not workflow steps)
 
 `assets/example-scheme.json` is the canonical format sample; `app/version.json` declares the
-path-launcher contract and pins the bundled runtime checksums. The focused
-`scripts/validate-scheme.test.mjs`, `scripts/shortcut.test.mjs`, `scripts/sync-editor.test.mjs`,
-`scripts/skill.integration.test.mjs`, and `scripts/validate-skill.mjs`
-are run by the repository's test suite; `evals/README.md` explains fresh-session output and trigger
-evaluation. They are maintainer resources, not extra tasks to repeat for each generated schema.
+path-launcher contract and pins the bundled runtime checksums. The maintainer suite
+(`tests/*.test.mjs`, `tests/validate-skill.mjs`) and `tests/evals/README.md` — fresh-session
+output and trigger evaluation — live in the repository, not in this package: they are
+maintainer resources, not extra tasks to repeat for each generated schema.
 
 ## Finding the skill directory
 
@@ -154,7 +153,8 @@ or drops data if ignored.
   in-editor HTML button; without it the editor can still save JSON/PNG to a folder you pick once.
 - **Keep the bundled editor in sync with the editor repo.** The skill vendors a copy of SEditor;
   `scripts/sync-editor.mjs` installs it checksum-verified, and `app/version.json` pins the release.
-  Never hand-edit `app/editor.html`. See `AGENTS.md` for the update rule.
+  Never hand-edit `app/editor.html`: it is a build artifact from the SEditor repository and
+  every bundled file is checksum-pinned in `app/version.json`.
 - **Never clobber generated or human files by default.** If the JSON or its same-name launcher already exists and the request is to create a new schema, ask before overwriting; if the request explicitly updates that schema, preserve its slug and pair.
 - **Keep the generated JSON much smaller than the editor can render.** A 200-node diagram
   is unreadable. Split into several named schemas instead.

@@ -9,7 +9,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const skillDir = path.join(repoRoot, 'skills/seditor');
 const temp = await mkdtemp(path.join(os.tmpdir(), 'seditor-skill-e2e-'));
 let server;
 

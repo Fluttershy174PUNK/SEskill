@@ -4,14 +4,14 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [, , runDir] = process.argv;
 if (!runDir) {
-  console.error('usage: node scripts/grade-evals.mjs <eval-run-dir>');
+  console.error('usage: node tests/grade-evals.mjs <eval-run-dir>');
   process.exit(2);
 }
 let evals;
-try { evals = JSON.parse(await readFile(path.join(skillDir, 'evals/evals.json'), 'utf8')); } catch (error) {
+try { evals = JSON.parse(await readFile(path.join(repoRoot, 'tests/evals/evals.json'), 'utf8')); } catch (error) {
   console.error(`invalid evals/evals.json: ${error.message}`);
   process.exit(1);
 }
@@ -59,7 +59,7 @@ for (const item of evals.evals) {
   const passed = assertions.filter((x) => x.passed).length;
   report.push({ id: item.id, passed, failed: assertions.length - passed, assertions });
 }
-const output = { eval_file: 'evals/evals.json', run_dir: root, passed_assertions: report.reduce((n, x) => n + x.passed, 0), failed_assertions: failures, cases: report };
+const output = { eval_file: 'tests/evals/evals.json', run_dir: root, passed_assertions: report.reduce((n, x) => n + x.passed, 0), failed_assertions: failures, cases: report };
 await writeFile(path.join(root, 'grading.json'), `${JSON.stringify(output, null, 2)}\n`);
 console.log(`grading report: ${path.join(root, 'grading.json')} (${output.passed_assertions} passed, ${failures} failed)`);
 if (failures) process.exitCode = 1;

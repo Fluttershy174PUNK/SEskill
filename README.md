@@ -52,9 +52,16 @@ HTML-ярлык, который открывает её в редакторе.
 
 ## Установка
 
+Пакет навыка — это `skills/seditor/` (там лежит `SKILL.md`), остальное в репозитории —
+тесты, примеры и документация сопровождения.
+
 ```bash
-git clone https://github.com/Fluttershy174PUNK/SEskill /tmp/seditor-source
-cp -a /tmp/seditor-source/. .agents/skills/seditor/
+# pi — пакет клонируется целиком, skills/ обнаруживается сам
+pi install git:github.com/Fluttershy174PUNK/SEskill
+
+# любой другой харнесс (Claude Code, Codex, opencode) — копируем только пакет
+	git clone https://github.com/Fluttershy174PUNK/SEskill /tmp/seditor
+	cp -a /tmp/seditor/skills/seditor .agents/skills/seditor
 ```
 
 > Папка **обязана** называться `seditor` — так требует frontmatter `SKILL.md`.
@@ -92,22 +99,33 @@ node .SEditor/app/server.js    # → http://127.0.0.1:5174/editor.html
 
 ---
 
-## Состав пакета
+## Состав репозитория
 
-| Путь | Назначение |
-| --- | --- |
-| `SKILL.md` | инструкции навыка: workflow и правила генерации схем |
-| `references/schema-format.md` | точный формат SEditor v1 и подводные камни редактора |
-| `scripts/validate-scheme.mjs` | валидатор схем без зависимостей |
-| `scripts/sync-editor.mjs` | установка рантайма в `.SEditor/app/` с проверкой контрольных сумм |
-| `scripts/create-shortcut.mjs` | генератор ярлыков (обёртка над вендорным генератором) |
-| `scripts/system.test.mjs` | комплексный E2E-тест: редактор + навык + ярлыки |
-| `evals/` | промпты для оценки качества и триггеров |
-| `app/` | вендорная копия SEditor (рантайм редактора) |
-| `AGENTS.md` | правило синхронизации версий с репозиторием редактора |
+```text
+skills/seditor/              ← ПАКЕТ НАВЫКА: всё, что устанавливается
+  SKILL.md                   инструкции и workflow (единственная точка входа агента)
+  LICENSE
+  references/schema-format.md точный формат SEditor v1 и подводные камни
+  scripts/                   только то, что вызывает агент: sync-editor,
+                             create-shortcut, validate-scheme
+  assets/example-scheme.*    эталонный пример схемы и ярлыка
+  app/                       вендор SEditor: 5 файлов рантайма + version.json
 
-`app/` — это **вендорная копия** редактора. Версии и контрольные суммы закреплены
-в `app/version.json`; `AGENTS.md` описывает процедуру обновления.
+tests/                       проверки репозитория (не устанавливаются)
+  *.test.mjs                 unit/E2E: синхронизация, ярлыки, backend, структура
+  validate-skill.mjs         структурная валидация пакета
+  run-evals.mjs, grade-evals.mjs  механические eval-сценарии
+  evals/                     промпты для оценки качества и триггеров
+examples/auth-tasks/         проект-пример: src/ + сгенерированный .SEditor/
+docs/
+  vendoring.md               процедура обновления вендорного редактора
+  brief.md                   исходное ТЗ проекта
+verify.sh                    всё вышеперечисленное одной командой
+```
+
+`app/` — это **вендорная копия** редактора: те же 5 файлов, что лежат в `SEditor/app/`
+(конфигов сборки и тестов там нет — копировать их незачем). Версии и контрольные суммы
+закреплены в `app/version.json`; `docs/vendoring.md` описывает процедуру обновления.
 
 ---
 
@@ -123,24 +141,24 @@ bash verify.sh
 - Контрольные суммы и паритет вендорного рантайма с исходным репозиторием SEditor.
 - Валидатор схем: валидные, невалидные, битые и отсутствующие входы.
 - Файловые тесты: синхронизация версий, сохранность пользовательских файлов, подмена бандла.
-- **Комплексный E2E** (`scripts/system.test.mjs`): сборка редактора, round-trip данных ярлыка,
+- **Комплексный E2E** (`tests/system.test.mjs`): round-trip данных ярлыка,
   экранирование инъекций, глубокие пути со спецсимволами, HTTP-API и защита от обхода ROOT,
   паритет генераторов, обнаружение устаревших ярлыков.
 - Прогон eval-сценариев в изолированных временных проектах.
 
 Тесты выполняют скрипты и файлы навыка напрямую. **Они не запускают LLM** и не оценивают
 смысловую точность схем — для этого нужен прогон в чистом контексте агента
-(см. `evals/README.md`).
+(см. `tests/evals/README.md`).
 
 ### Eval-сценарии
 
 ```bash
-node scripts/run-evals.mjs                                  # механические проверки
-node scripts/grade-evals.mjs <run-dir>                      # оценка вывода реального агента
+node tests/run-evals.mjs                                  # механические проверки
+node tests/grade-evals.mjs <run-dir>                      # оценка вывода реального агента
 ```
 
-`evals/evals.json` — 8 сценариев с промптами и ожидаемыми результатами.
-`evals/eval_queries.json` — позитивные и near-miss запросы для проверки срабатывания триггера.
+`tests/evals/evals.json` — 8 сценариев с промптами и ожидаемыми результатами.
+`tests/evals/eval_queries.json` — позитивные и near-miss запросы для проверки срабатывания триггера.
 Срабатывание зависит от модели и клиента: детерминированные тесты не могут утверждать,
 что навык вызвался.
 

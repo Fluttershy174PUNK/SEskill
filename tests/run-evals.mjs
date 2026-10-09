@@ -8,10 +8,12 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const sourceEditor = path.resolve(skillDir, '..', 'SEditor/app');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const skillDir = path.join(repoRoot, 'skills/seditor');
+const evalsDir = path.join(repoRoot, 'tests/evals');
+const sourceEditor = path.resolve(repoRoot, '../SEditor/app');
 let evals;
-try { evals = JSON.parse(await readFile(path.join(skillDir, 'evals/evals.json'), 'utf8')); } catch (error) {
+try { evals = JSON.parse(await readFile(path.join(evalsDir, 'evals.json'), 'utf8')); } catch (error) {
   console.error(`invalid evals/evals.json: ${error.message}`);
   process.exit(1);
 }

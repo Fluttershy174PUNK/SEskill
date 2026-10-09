@@ -5,7 +5,9 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const skillDir = path.join(repoRoot, 'skills/seditor');
+const evalsDir = path.join(repoRoot, 'tests/evals');
 const errors = [];
 const check = (condition, message) => condition || errors.push(message);
 
@@ -20,7 +22,7 @@ if (frontmatter) {
   check(!metadataText || metadataText.split('\n').filter(Boolean).every((line) => /^\s+[\w.-]+:\s*[^\s#].*$/.test(line)), 'metadata must be a string-to-string YAML map');
   check(/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) && name.length <= 64, 'frontmatter name invalid');
   check(name === 'seditor', 'frontmatter name must be seditor');
-  check(path.basename(skillDir) === 'seditor' || (path.basename(skillDir) === 'SEskill' && path.basename(path.dirname(skillDir)) === 'home'), 'skill directory name must match frontmatter name or be the named monorepo package');
+  check(path.basename(skillDir) === 'seditor', 'payload must live at skills/seditor (directory name matches frontmatter name)');
   check(description.length > 0 && description.length <= 1024, 'frontmatter description must be 1..1024 chars');
   const license = fm.match(/^license:\s*(.*)$/m)?.[1];
   const compatibility = fm.match(/^compatibility:\s*(.*)$/m)?.[1];
@@ -51,26 +53,26 @@ const manifestText = await readFile(path.join(skillDir, 'app/version.json'), 'ut
 check(skillMd.includes('app/version.json'), 'SKILL.md should mention the bundled runtime manifest');
 const workflowText = await readFile(path.join(skillDir, 'SKILL.md'), 'utf8');
 check(workflowText.includes('scripts/sync-editor.mjs') && workflowText.includes('scripts/create-shortcut.mjs'), 'skill workflow should call the bundled sync and launcher scripts');
-for (const file of ['assets/example-scheme.json', 'scripts/validate-scheme.test.mjs', 'scripts/shortcut.test.mjs', 'scripts/validate-skill.mjs', 'scripts/sync-editor.test.mjs', 'scripts/skill.integration.test.mjs', 'evals/README.md', 'app/version.json']) {
+for (const file of ['assets/example-scheme.json', 'scripts/sync-editor.mjs', 'scripts/create-shortcut.mjs', 'scripts/validate-scheme.mjs', 'app/version.json', 'LICENSE']) {
   check(workflowText.includes(file) || skillMd.includes(file), `SKILL.md should reference resource: ${file}`);
 }
 check(script.includes('createShortcut') && script.includes('renderShortcut'), 'skill launcher wrapper must delegate to the bundled generator');
 check(manifestText.includes('embed-v1'), 'launcher format missing from release manifest');
-const testScript = await readFile(path.join(skillDir, 'scripts/shortcut.test.mjs'), 'utf8');
+const testScript = await readFile(path.join(repoRoot, 'tests/shortcut.test.mjs'), 'utf8');
 check(testScript.includes("assert.deepEqual(readFileSync(join(bundledEditor"), 'launcher test must assert editor-version parity');
-const skillTests = await readFile(path.join(skillDir, 'scripts/validate-scheme.test.mjs'), 'utf8');
+const skillTests = await readFile(path.join(repoRoot, 'tests/validate-scheme.test.mjs'), 'utf8');
 check(skillTests.includes('malformed') && skillTests.includes('missing'), 'schema validator tests must cover bad and missing input');
-const integrationTest = await readFile(path.join(skillDir, 'scripts/skill.integration.test.mjs'), 'utf8');
+const integrationTest = await readFile(path.join(repoRoot, 'tests/skill.integration.test.mjs'), 'utf8');
 check(integrationTest.includes('logic-demo-revised') && integrationTest.includes('validate-scheme.mjs'), 'skill integration test must cover live schema revisions and validation');
 const syncScript = await readFile(path.join(skillDir, 'scripts/sync-editor.mjs'), 'utf8');
 check(syncScript.includes('checksum failed') && syncScript.includes('version.json'), 'skill editor sync must check bundle integrity');
-const syncTest = await readFile(path.join(skillDir, 'scripts/sync-editor.test.mjs'), 'utf8');
+const syncTest = await readFile(path.join(repoRoot, 'tests/sync-editor.test.mjs'), 'utf8');
 check(syncTest.includes('old-editor.js') && syncTest.includes('checksum failed'), 'skill sync tests must cover stale files and tampering');
 const validator = await readFile(path.join(skillDir, 'scripts/validate-scheme.mjs'), 'utf8');
 check(validator.includes("data.shape") && validator.includes('sourceHandle'), 'schema validator missing core checks');
 
 const examples = [
-  path.join(skillDir, 'project-example/.SEditor'),
+  path.join(repoRoot, 'examples/auth-tasks/.SEditor'),
   path.join(skillDir, 'assets')
 ];
 for (const directory of examples) {
@@ -97,13 +99,13 @@ for (const directory of examples) {
 }
 
 let evalFile;
-try { evalFile = JSON.parse(await readFile(path.join(skillDir, 'evals/evals.json'), 'utf8')); } catch (error) {
+try { evalFile = JSON.parse(await readFile(path.join(evalsDir, 'evals.json'), 'utf8')); } catch (error) {
   errors.push(`evals/evals.json invalid: ${error.message}`);
   evalFile = { evals: [] };
 }
 check(evalFile.skill_name === 'seditor' && Array.isArray(evalFile.evals) && evalFile.evals.length >= 6, 'evals.json needs 6+ cases for seditor');
 let triggerQueries;
-try { triggerQueries = JSON.parse(await readFile(path.join(skillDir, 'evals/eval_queries.json'), 'utf8')); } catch (error) {
+try { triggerQueries = JSON.parse(await readFile(path.join(evalsDir, 'eval_queries.json'), 'utf8')); } catch (error) {
   errors.push(`evals/eval_queries.json invalid: ${error.message}`);
   triggerQueries = [];
 }

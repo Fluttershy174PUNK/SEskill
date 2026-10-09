@@ -1,4 +1,4 @@
-# project-example — try the `seditor` skill
+# auth-tasks — пример проекта для навыка `seditor`
 
 A tiny demo project so you can verify the skill end to end. It has **two** roles:
 
@@ -9,7 +9,7 @@ A tiny demo project so you can verify the skill end to end. It has **two** roles
 ## What's here
 
 ```text
-project-example/
+auth-tasks/
 ├── README.md
 ├── package.json               # the demo "Auth + Tasks" app
 ├── src/
@@ -36,10 +36,10 @@ The launcher carries the schema inside itself (`file://` cannot read a sibling J
 agent edit to the JSON, regenerate the launcher:
 
 ```bash
-node ../scripts/create-shortcut.mjs .SEditor/logic-auth-flow.json .SEditor/logic-auth-flow.html .SEditor/app/editor.html
+node ../../skills/seditor/scripts/create-shortcut.mjs .SEditor/logic-auth-flow.json .SEditor/logic-auth-flow.html .SEditor/app/editor.html
 ```
 
-The optional backend (`node .SEditor/app/server.js` from `project-example/`) adds the recent-schema
+The optional backend (`node .SEditor/app/server.js` from `auth-tasks/`) adds the recent-schema
 list and direct disk writes.
 
 That round trip is the whole point of the skill: **the agent writes JSON, the human edits it visually.**
@@ -59,8 +59,8 @@ The agent should produce the same shape of output that is already committed here
 ## Validate
 
 ```bash
-node ../scripts/validate-scheme.mjs .SEditor/*.json
-node ../scripts/validate-scheme.mjs --selfcheck
+node ../../skills/seditor/scripts/validate-scheme.mjs .SEditor/*.json
+node ../../skills/seditor/scripts/validate-scheme.mjs --selfcheck
 ```
 
 Both must pass with exit code 0. The validator encodes the rules the bundled editor really
@@ -72,6 +72,6 @@ node and edge counts should match the JSON, and no zone link should be dropped o
 
 ## Then
 
-Read [`../references/schema-format.md`](../references/schema-format.md) for
+Read [`../../skills/seditor/references/schema-format.md`](../../skills/seditor/references/schema-format.md) for
 the full JSON shape and the list of places where the real editor differs from the upstream
 README (it is worth reading before generating your own schemas).

@@ -7,7 +7,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const skillDir = path.join(repoRoot, 'skills/seditor');
 const validator = path.join(skillDir, 'scripts/validate-scheme.mjs');
 const temp = await mkdtemp(path.join(os.tmpdir(), 'seditor-validator-'));
 const run = (file) => spawnSync(process.execPath, [validator, file], { encoding: 'utf8' });

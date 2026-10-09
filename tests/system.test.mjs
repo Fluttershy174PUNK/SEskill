@@ -22,19 +22,20 @@ import path from 'node:path';
 import vm from 'node:vm';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const repoRoot = path.resolve(skillDir, '..');
-const editorRepo = path.join(repoRoot, 'SEditor');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const skillDir = path.join(repoRoot, 'skills/seditor');
+const editorRepo = process.env.SEDITOR_ROOT
+  ? path.resolve(process.env.SEDITOR_ROOT)
+  : path.resolve(repoRoot, '..', 'SEditor');
+// Паритет вендора требует исходного редактора: падаем явно, а не молча пропускаем.
+await readFile(path.join(editorRepo, 'app', 'version.json'), 'utf8').catch(() => {
+  console.error(`SEditor source checkout not found at ${editorRepo}.`);
+  console.error('  git clone https://github.com/Fluttershy174PUNK/SEditor ../SEditor');
+  console.error('  (or: export SEDITOR_ROOT=/path/to/SEditor)');
+  process.exit(1);
+});
 const temp = await mkdtemp(path.join(os.tmpdir(), 'seditor-system-'));
 const results = [];
-const check = (name, fn) => {
-  try {
-    fn();
-    results.push({ name, ok: true });
-  } catch (error) {
-    results.push({ name, ok: false, error: error.message });
-  }
-};
 const tests = async (name, fn) => {
   try {
     await fn();
@@ -126,14 +127,14 @@ try {
     for (const file of RUNTIME_FILES) assert.ok(manifest.files[file], `manifest must pin ${file}`);
   });
 
-  await tests('editor: вендорная копия скилла идентична исходному репозиторию (8 файлов)', async () => {
+  await tests('editor: вендорная копия скилла идентична исходному репозиторию (5 файлов)', async () => {
     for (const file of [...RUNTIME_FILES, 'version.json']) {
       assert.deepEqual(await readFile(path.join(skillApp, file)), await readFile(path.join(appSrc, file)), `vendored differs: ${file}`);
     }
   });
 
   await tests('editor: version.json одинаков во всех трёх местах', async () => {
-    const places = [path.join(appSrc, 'version.json'), path.join(skillApp, 'version.json'), path.join(skillDir, 'project-example/.SEditor/app/version.json')];
+    const places = [path.join(appSrc, 'version.json'), path.join(skillApp, 'version.json'), path.join(repoRoot, 'examples/auth-tasks/.SEditor/app/version.json')];
     const texts = await Promise.all(places.map((p) => readFile(p, 'utf8')));
     assert.equal(new Set(texts).size, 1, 'version manifest must be identical everywhere');
   });
@@ -303,7 +304,7 @@ try {
   });
 
   await tests('скилл: каждая схема примера валидна и имеет парный ярлык с round-trip', async () => {
-    const dir = path.join(skillDir, 'project-example/.SEditor');
+    const dir = path.join(repoRoot, 'examples/auth-tasks/.SEditor');
     const schemas = (await readdir(dir)).filter((f) => f.endsWith('.json') && f !== 'version.json');
     assert.ok(schemas.length > 0, 'example must contain schemas');
     for (const file of schemas) {
@@ -320,13 +321,13 @@ try {
     }
   });
 
-  await tests('скилл: SKILL.md и AGENTS.md описывают контракт ярлыка и версии', async () => {
+  await tests('скилл: SKILL.md и docs/vendoring.md описывают контракт ярлыка и версии', async () => {
     const skill = await readFile(path.join(skillDir, 'SKILL.md'), 'utf8');
-    const agents = await readFile(path.join(skillDir, 'AGENTS.md'), 'utf8');
+    const agents = await readFile(path.join(repoRoot, 'docs/vendoring.md'), 'utf8');
     assert.match(skill, /regenerate/i, 'SKILL.md must require launcher regeneration');
     assert.match(skill, /embed-v1|встраива|embedded/i, 'SKILL.md must document embedded data');
-    assert.match(agents, /github\.com\/Fluttershy174PUNK\/SEditor/, 'AGENTS.md must link the editor repo');
-    assert.match(agents, /sync-editor\.mjs/, 'AGENTS.md must document the sync path');
+    assert.match(agents, /github\.com\/Fluttershy174PUNK\/SEditor/, 'vendoring.md must link the editor repo');
+    assert.match(agents, /sync-editor\.mjs/, 'vendoring.md must document the sync path');
   });
 
   // ---------------------------------------------------------------- отчёт

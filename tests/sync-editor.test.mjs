@@ -5,9 +5,10 @@ import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { syncEditor } from './sync-editor.mjs';
+import { syncEditor } from '../skills/seditor/scripts/sync-editor.mjs';
 
-const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const skillDir = path.join(repoRoot, 'skills/seditor');
 const temp = await mkdtemp(path.join(os.tmpdir(), 'seditor-sync-test-'));
 try {
   const project = path.join(temp, 'project');
