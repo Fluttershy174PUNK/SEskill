@@ -124,6 +124,40 @@ for (const item of evalFile.evals || []) {
   check(Array.isArray(item.assertions) && item.assertions.length > 0, `eval ${item.id} assertions missing`);
 }
 
+// Что именно устанавливается: единственный allowlist пакета. Лишний файл внутри
+// skills/seditor/ — ошибка (например, забытый тест или промежуточный артефакт).
+const allowedPayload = new Set([
+  'SKILL.md',
+  'LICENSE',
+  'references/schema-format.md',
+  'scripts/sync-editor.mjs',
+  'scripts/create-shortcut.mjs',
+  'scripts/validate-scheme.mjs',
+  'assets/example-scheme.json',
+  'assets/example-scheme.html',
+  'app/editor.html',
+  'app/server.js',
+  'app/create-shortcut.mjs',
+  'app/shortcut.html',
+  'app/launcher.js',
+  'app/version.json'
+]);
+const walk = async (dir) => {
+  const found = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...(await walk(full)));
+    else found.push(path.relative(skillDir, full));
+  }
+  return found;
+};
+const payloadFiles = await walk(skillDir);
+for (const file of payloadFiles) {
+  check(allowedPayload.has(file), `unexpected file in installable payload: ${file}`);
+}
+check(payloadFiles.length === allowedPayload.size,
+  `payload must be exactly ${allowedPayload.size} files, found ${payloadFiles.length}`);
+
 if (errors.length) {
   for (const error of errors) console.error(`FAIL ${error}`);
   process.exitCode = 1;
