@@ -21,7 +21,7 @@
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| `version` | yes | Must be `1`. |
+| `version` | yes | Current version is `1`. Files without a version are read as legacy v1; versions above the supported version are rejected to prevent accidental data loss. |
 | `meta.name` | yes | Becomes the editor's schema name. The editor does **not** derive it from the filename — if it is empty the toolbar shows "Untitled" and Save suggests `schema.json`. Keep it equal to the slug. |
 | `meta.app` | no | The editor always writes `"SEditor"`. |
 | `meta.updated` | no | The editor overwrites this with the save timestamp. |
@@ -54,9 +54,9 @@
 | `data.desc` | no | Long-form text; shown in the properties panel. Not drawn on the canvas. |
 | `data.cells` | table only | `{ "row,col": "text" }`, zero-based. This is the **only** key the table reader understands. |
 | `data.cols` / `data.rows` / `data.header` | table only | Integers ≥ 1, `header` boolean (first row is a header band). |
-| `data.zones` | no | Written by the editor from geometry (list of zone ids). See "Containment is positional". |
-| `data.level` / `data.stage` | no | Written by the editor from geometry (the band divider's `label`, or `null`). |
-| `zIndex` | no | `-2` for zone, `-1` for level/stage; the editor sets this itself. |
+| `data.fill` | no | Optional fill for standard shapes: one of the 16 colors in the editor palette. Invalid values are discarded. |
+| `zIndex` | no | Optional ordering among standard shapes. Zones remain behind shapes and dividers retain their fixed layer. |
+| `data.zones`, `data.contains`, `data.level`, `data.stage` | no | Geometry-derived display information; omitted from compact saves and recomputed when opened. See "Containment is positional". |
 
 ### Shape vocabulary
 
@@ -124,15 +124,15 @@ extends it to the whole board, so a 400-wide `level` still draws across everythi
 ## Containment is positional, not declarative
 
 **This is the biggest difference from the upstream README.** The editor computes
-zone / level / stage membership from **geometry** every time it loads and saves
-(`app/editor.html`: `kg`, `Ag`). The `data.zones`, `data.levels`, `data.stages` and
-zone's `data.contains` fields in a file are **outputs**, not inputs:
+zone / level / stage membership from **geometry** every time it loads and saves.
+Membership fields are derived and omitted from new saves; older files that contain them
+remain readable. They are **outputs**, not inputs:
 
 | What you write | What the editor does |
 | --- | --- |
 | `data.zones: ["z1"]` on a node whose bounds do **not** overlap the `z1` rect | Drops the link on save — the node is not inside the zone. |
-| A node overlapping a zone but with `data.zones: []` | Adds the link on save. |
-| `data.contains` on a `zone` | Always rewritten from geometry. |
+| A node overlapping a zone but with `data.zones: []` | Adds the link on load/save; fresh saves omit the derived field. |
+| `data.contains` on a `zone` | Recomputed from geometry; omitted in fresh saves. |
 | `data.level` / `data.stage` | **These are the editor's output fields.** It writes them itself as the band's **label string** (or `null`). A value you write that disagrees with the geometry is overwritten on save. |
 | `data.levels` / `data.stages` (arrays) | **Neither read nor written.** Do not use them — the editor stores band membership in the singular `data.level` / `data.stage` keys. |
 
@@ -161,6 +161,16 @@ node <skill-dir>/scripts/validate-scheme.mjs .SEditor/*.json
 ```
 
 The validator flags every declared-but-mismatched link as a warning.
+
+## Compact JSON and backward compatibility
+
+Schema version stays at `1`: optional `data.fill` and shape `zIndex` are additive fields,
+so existing v1 editors ignore them safely. Missing `version` is accepted as legacy v1.
+Files with a future version are rejected instead of silently stripping unknown data.
+New saves omit default values (`label: ""`, `labelPos: "inside"`, empty `desc`), empty
+membership outputs, default table settings and default styling. Readers restore those defaults.
+Use `data.fill` only for one of the 16 palette hex colors; absent or invalid values preserve
+normal shape styling. `zIndex` is written only when a shape has an explicit layer rank.
 
 ## Minimal valid example
 

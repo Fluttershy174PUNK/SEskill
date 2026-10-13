@@ -1,10 +1,10 @@
 {
   "name": "SEditor",
-  "version": "0.3.2",
+  "version": "0.4.1",
   "schemaVersion": 1,
   "launcherFormat": "embed-v1",
   "files": {
-    "editor.html": "8e652c1ec4a3e6fe6b36f8804449000e81fcbb6a367719d1440f1a3ed876cf8f",
+    "editor.html": "f052ab36e9fc856d6ef2078f884cc7bedfa6d164adf7a1d883d9898fd39d7ddd",
     "server.js": "3b367ef206026a33f52bc6e827e0f12ae15298f06c0b38863f067c0f5dca56c1",
     "create-shortcut.mjs": "9a5b95ed7af765b313fc4e6d916ee6ece4679c57796591e0b34e07a18f8eae42",
     "shortcut.html": "8744ef771c9d391083a87257dde9dd39b7e9899e1bbd5ed4c605a55e0b966a43",

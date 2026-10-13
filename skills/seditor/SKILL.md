@@ -68,7 +68,7 @@ same type from overwriting each other. Set `meta.name` to the same string.
    bundled editor actually reads, which differs from the upstream README in ways that
    silently lose data (see Gotchas).
 4. **Check before writing.** If the target JSON exists, preserve it; ask before overwriting human edits. For an edit request, prefer updating the existing schema and keep its slug.
-5. **Write the SEditor v1 JSON** into `.SEditor/<type>-<topic>.json`.
+5. **Write compact SEditor v1 JSON** into `.SEditor/<type>-<topic>.json`: omit defaults and geometry-derived membership; include `data.fill` only from the 16-color palette and `zIndex` only for intentional shape ordering. Old files without a version are treated as v1; never downgrade/overwrite files with a future schema version.
 6. **Install/update the managed editor runtime** with `node <skill-dir>/scripts/sync-editor.mjs <project-root>`. It verifies bundle checksums and updates only runtime-owned files. Preserve schemas, launchers, and every unrelated/user file under `.SEditor/`.
 7. **Generate the same-basename launcher** with `node <skill-dir>/scripts/create-shortcut.mjs .SEditor/<slug>.json .SEditor/<slug>.html .SEditor/app/editor.html`. The launcher carries the schema inside itself and redirects into `.SEditor/app/editor.html`, so a double click opens the schema with **no backend**. Because the data is embedded, **regenerate the launcher every time you write the JSON** — it is the last step of any schema edit, not a one-off at creation.
 8. **Validate and repair** with `node <skill-dir>/scripts/validate-scheme.mjs .SEditor/*.json`; check the launcher with the generator's `--check` mode.
@@ -151,6 +151,8 @@ or drops data if ignored.
   every edit. A JSON with `</script>` or `<` in a label is safe: `<` is stored as `\u003c`.
   The optional backend (`node .SEditor/app/server.js`) only adds recents, disk writes, and the
   in-editor HTML button; without it the editor can still save JSON/PNG to a folder you pick once.
+- **Schema compatibility and readability:** keep additive fields under schema v1 only when old readers can safely ignore them. The editor rejects versions newer than v1 to avoid destructive saves. Prefer omitted defaults (`label`, `desc`, `labelPos`, table defaults, standard styles) and derived membership fields for readable, compact JSON. Fill colors must be one of the editor's 16 palette values; shape layer order is optional numeric `zIndex`.
+- **Editor shortcuts:** canvas focus supports copy/paste/cut (`Ctrl/Cmd+C/V/X`) and undo/redo. These should not intercept text editing in controls.
 - **Keep the bundled editor in sync with the editor repo.** The skill vendors a copy of SEditor;
   `scripts/sync-editor.mjs` installs it checksum-verified, and `app/version.json` pins the release.
   Never hand-edit `app/editor.html`: it is a build artifact from the SEditor repository and
