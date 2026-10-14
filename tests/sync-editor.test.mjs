@@ -21,6 +21,7 @@ try {
   const manifest = JSON.parse(await readFile(path.join(skillDir, 'app', 'version.json'), 'utf8'));
   assert.equal(first.version, manifest.version);
   assert.equal(first.changed, true);
+  assert.deepEqual(await readFile(path.join(project, 'SEditor.html')), await readFile(path.join(skillDir, 'app/editor.html')));
   for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'version.json']) {
     assert.deepEqual(await readFile(path.join(staleApp, file)), await readFile(path.join(skillDir, 'app', file)));
   }
@@ -31,8 +32,21 @@ try {
   assert.equal(await readFile(path.join(staleApp, 'old-editor.js'), 'utf8'), 'user-owned file', 'do not delete unrecognized user files');
   const installedManifest = await readFile(path.join(staleApp, 'version.json'), 'utf8');
   const second = await syncEditor(project);
-  assert.equal(second.changed, false, 'same version must be idempotent');
+  assert.equal(second.changed, false, 'same version and runtime are idempotent');
   assert.equal(await readFile(path.join(staleApp, 'version.json'), 'utf8'), installedManifest);
+  const rootHtml = path.join(project, 'SEditor.html');
+  const managedFiles = ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'version.json'];
+  await writeFile(path.join(staleApp, 'version.json'), '{"version":"0.4.0"}');
+  const runtimeBeforeConflict = await Promise.all(managedFiles.map((file) => readFile(path.join(staleApp, file))));
+  await writeFile(rootHtml, 'user-owned root HTML');
+  await assert.rejects(syncEditor(project), /preserving it/);
+  assert.equal(await readFile(rootHtml, 'utf8'), 'user-owned root HTML', 'do not overwrite unmanaged root HTML');
+  assert.deepEqual(await Promise.all(managedFiles.map((file) => readFile(path.join(staleApp, file)))), runtimeBeforeConflict, 'conflict must fail before changing managed runtime files');
+  await writeFile(rootHtml, await readFile(path.join(staleApp, 'editor.html')));
+  await writeFile(path.join(staleApp, 'version.json'), '{"version":"0.4.1"}');
+  const upgraded = await syncEditor(project);
+  assert.equal(upgraded.changed, true, 'upgrade a previously managed root HTML');
+  assert.deepEqual(await readFile(rootHtml), await readFile(path.join(skillDir, 'app/editor.html')));
 
   const broken = path.join(temp, 'broken-bundle');
   await mkdir(broken, { recursive: true });

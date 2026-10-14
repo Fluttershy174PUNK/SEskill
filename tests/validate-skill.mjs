@@ -41,7 +41,7 @@ try { manifest = JSON.parse(await readFile(path.join(skillDir, 'app/version.json
   errors.push(`app/version.json invalid: ${error.message}`);
   manifest = { files: {} };
 }
-check(manifest.name === 'SEditor' && manifest.schemaVersion === 1 && manifest.launcherFormat === 'embed-v1', 'editor manifest contract mismatch');
+check(manifest.name === 'SEditor' && manifest.version === '0.6.0' && manifest.schemaVersion === 1 && manifest.launcherFormat === 'embed-v1', 'editor manifest contract mismatch');
 for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js']) {
   const bundled = await readFile(path.join(skillDir, 'app', file));
   const hash = createHash('sha256').update(bundled).digest('hex');
@@ -52,8 +52,8 @@ const script = await readFile(path.join(skillDir, 'scripts/create-shortcut.mjs')
 const manifestText = await readFile(path.join(skillDir, 'app/version.json'), 'utf8');
 check(skillMd.includes('app/version.json'), 'SKILL.md should mention the bundled runtime manifest');
 const workflowText = await readFile(path.join(skillDir, 'SKILL.md'), 'utf8');
-check(workflowText.includes('scripts/sync-editor.mjs') && workflowText.includes('scripts/create-shortcut.mjs'), 'skill workflow should call the bundled sync and launcher scripts');
-for (const file of ['assets/example-scheme.json', 'scripts/sync-editor.mjs', 'scripts/create-shortcut.mjs', 'scripts/validate-scheme.mjs', 'app/version.json', 'LICENSE']) {
+check(workflowText.includes('scripts/sync-editor.mjs') && workflowText.includes('scripts/create-shortcut.mjs') && workflowText.includes('scripts/validate-project.mjs'), 'skill workflow should call bundled runtime, launcher, and project validation scripts');
+for (const file of ['assets/example-scheme.json', 'scripts/sync-editor.mjs', 'scripts/create-shortcut.mjs', 'scripts/validate-scheme.mjs', 'scripts/validate-project.mjs', 'app/version.json', 'LICENSE']) {
   check(workflowText.includes(file) || skillMd.includes(file), `SKILL.md should reference resource: ${file}`);
 }
 check(script.includes('createShortcut') && script.includes('renderShortcut'), 'skill launcher wrapper must delegate to the bundled generator');
@@ -70,6 +70,8 @@ const syncTest = await readFile(path.join(repoRoot, 'tests/sync-editor.test.mjs'
 check(syncTest.includes('old-editor.js') && syncTest.includes('checksum failed'), 'skill sync tests must cover stale files and tampering');
 const validator = await readFile(path.join(skillDir, 'scripts/validate-scheme.mjs'), 'utf8');
 check(validator.includes("data.shape") && validator.includes('sourceHandle'), 'schema validator missing core checks');
+const projectValidator = await readFile(path.join(skillDir, 'scripts/validate-project.mjs'), 'utf8');
+check(projectValidator.includes('validate-scheme.mjs') && projectValidator.includes('--check'), 'project validator should combine schema and launcher freshness checks');
 
 const examples = [
   path.join(repoRoot, 'examples/auth-tasks/.SEditor'),
@@ -133,6 +135,7 @@ const allowedPayload = new Set([
   'scripts/sync-editor.mjs',
   'scripts/create-shortcut.mjs',
   'scripts/validate-scheme.mjs',
+  'scripts/validate-project.mjs',
   'assets/example-scheme.json',
   'assets/example-scheme.html',
   'app/editor.html',

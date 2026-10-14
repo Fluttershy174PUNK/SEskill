@@ -8,10 +8,10 @@ description: >
   the schema directly. Do not use for ordinary prose explanations or CSS/code
   fixes that do not request a project schema.
 license: MIT
-compatibility: Node.js >= 18 for the bundled local editor backend.
+compatibility: Node.js >= 18 for schema generation and validation scripts.
 metadata:
   author: Fluttershy174PUNK
-  version: "0.4.0"
+  version: "0.6.0"
   upstream_editor: "https://github.com/Fluttershy174PUNK/SEditor"
   allowed_harnesses: "pi, claude-code, codex, opencode"
   license_file: "LICENSE"
@@ -39,7 +39,7 @@ For each schema, in the project's `.SEditor/` folder (create it if missing):
 └── <type>-<topic>.html       # ярлык: открывает схему двойным кликом, без сервера
 ```
 
-One invocation can produce several schemas if the request covers distinct concerns.
+One invocation can produce several schemas when the request names distinct concerns; keep each diagram focused.
 
 ### Naming
 
@@ -64,19 +64,17 @@ same type from overwriting each other. Set `meta.name` to the same string.
 2. **Inspect the project** — existing files, modules, naming, routes. Run `ls`, `grep`,
    `read` on the project root. The schema must describe what is actually there. An empty
    project is fine: build it from the user's description instead of refusing.
-3. **Read `references/schema-format.md`** before writing any JSON. It documents what the
-   bundled editor actually reads, which differs from the upstream README in ways that
-   silently lose data (see Gotchas).
+3. **Use the bundled mini-reference by default:** copy the compact structure from `assets/example-scheme.json`. Read `references/schema-format.md` when using non-default shapes, tables, zones/lanes, custom edge styles, or when an editor round-trip changes data.
 4. **Check before writing.** If the target JSON exists, preserve it; ask before overwriting human edits. For an edit request, prefer updating the existing schema and keep its slug.
-5. **Write compact SEditor v1 JSON** into `.SEditor/<type>-<topic>.json`: omit defaults and geometry-derived membership; include `data.fill` only from the 16-color palette and `zIndex` only for intentional shape ordering. Old files without a version are treated as v1; never downgrade/overwrite files with a future schema version.
-6. **Install/update the managed editor runtime** with `node <skill-dir>/scripts/sync-editor.mjs <project-root>`. It verifies bundle checksums and updates only runtime-owned files. Preserve schemas, launchers, and every unrelated/user file under `.SEditor/`.
-7. **Generate the same-basename launcher** with `node <skill-dir>/scripts/create-shortcut.mjs .SEditor/<slug>.json .SEditor/<slug>.html .SEditor/app/editor.html`. The launcher carries the schema inside itself and redirects into `.SEditor/app/editor.html`, so a double click opens the schema with **no backend**. Because the data is embedded, **regenerate the launcher every time you write the JSON** — it is the last step of any schema edit, not a one-off at creation.
-8. **Validate and repair** with `node <skill-dir>/scripts/validate-scheme.mjs .SEditor/*.json`; check the launcher with the generator's `--check` mode.
-9. **Hand off** the launcher path. Opening `.SEditor/<slug>.html` needs nothing else. Mention the optional backend (`node .SEditor/app/server.js`) only for the extras it adds: recent-schema list, saving JSON/PNG straight to disk, and the in-editor HTML button.
+5. **Write compact, readable SEditor v1 JSON** to `.SEditor/<type>-<topic>.json`. Use stable short ids (`n1`, `e1`), one node/edge per object, concise labels, and omit defaults/derived fields; do not minify JSON. The editor restores omitted defaults. Add descriptions only when they clarify the diagram. Never overwrite an existing human-edited schema without explicit permission or downgrade a future version.
+6. **Ensure the managed runtime exists.** If `.SEditor/app/editor.html` is missing, install the checksum-verified runtime using `node <skill-dir>/scripts/sync-editor.mjs <project-root>`. It preserves user schemas and refuses a conflicting root `SEditor.html`; don't rerun it unnecessarily.
+7. **Generate the paired launcher** with `node <skill-dir>/scripts/create-shortcut.mjs .SEditor/<slug>.json .SEditor/<slug>.html .SEditor/app/editor.html`. It embeds the schema and opens the standalone editor without a server. Regenerate after every JSON edit.
+8. **Validate in one command:** `node <skill-dir>/scripts/validate-project.mjs <project-root>`. It validates every `.SEditor/*.json` and checks each paired launcher is current. Fix errors and unintended warnings; never claim success on failure.
+9. **Hand off** the `.SEditor/<slug>.html` path and mention it opens offline. Node is needed only for schema/launcher generation and validation; normal editing needs no server.
 
 ### Repository support files (not workflow steps)
 
-`assets/example-scheme.json` is the canonical format sample; `app/version.json` declares the
+`scripts/validate-scheme.mjs` validates individual schema files; `scripts/validate-project.mjs` is the one-command project check. `assets/example-scheme.json` is the compact format sample; `app/version.json` declares the
 path-launcher contract and pins the bundled runtime checksums. The maintainer suite
 (`tests/*.test.mjs`, `tests/validate-skill.mjs`) and `tests/evals/README.md` — fresh-session
 output and trigger evaluation — live in the repository, not in this package: they are
@@ -86,9 +84,8 @@ maintainer resources, not extra tasks to repeat for each generated schema.
 
 Resolve it once at the start, then use it as `<skill-dir>`:
 
-- pi / Claude Code substitute the skill path automatically — use it directly.
-- Otherwise: `dirname` of the resolved `SKILL.md`, e.g.
-  `ls <skill-dir>/app/shortcut.html` to confirm.
+- Pi provides the resolved skill directory path — use it for bundled scripts.
+- Otherwise, resolve the directory containing this `SKILL.md` once and use it as `<skill-dir>`.
 
 ## Schema type menu (only when the command has no text)
 
@@ -101,16 +98,17 @@ Resolve it once at the start, then use it as `<skill-dir>`:
 | `deployment` | infra topology, services, deploys | `deployment-topology` |
 | `custom` | anything else — ask the user for the topic name | user-provided |
 
-The JSON vocabulary is identical for every type; only the nodes you choose differ.
+The JSON vocabulary is identical for every type; only the nodes you choose differ. Load `assets/example-scheme.json` for a compact starting point and `references/schema-format.md` only when shape-specific details are needed.
 
 ## Validation loop
 
-Run the bundled validator on the written schemas and check that the corresponding launcher exists and matches its JSON name:
+After every schema or launcher edit, run this read-only project check; it validates all schemas and checks launcher freshness:
 
 ```bash
-node <skill-dir>/scripts/validate-scheme.mjs .SEditor/*.json
-node <skill-dir>/scripts/create-shortcut.mjs .SEditor/<slug>.json .SEditor/<slug>.html .SEditor/app/editor.html --check
+node <skill-dir>/scripts/validate-project.mjs <project-root>
 ```
+
+If a launcher is missing or stale, regenerate it with the `create-shortcut.mjs` command in workflow step 7 and rerun validation.
 
 It checks JSON validity, id uniqueness and edge endpoints, the shape/handle/enum
 vocabularies, table cell keys, size clamping, and geometric zone/level/stage containment.
@@ -149,30 +147,18 @@ or drops data if ignored.
   `.SEditor/app/editor.html` via `#d=<json>&p=<path>`. It is not a live view — an agent edit to the
   JSON is invisible in the launcher until it is regenerated, so regenerate it as the final step of
   every edit. A JSON with `</script>` or `<` in a label is safe: `<` is stored as `\u003c`.
-  The optional backend (`node .SEditor/app/server.js`) only adds recents, disk writes, and the
-  in-editor HTML button; without it the editor can still save JSON/PNG to a folder you pick once.
+  The standalone editor opens JSON with browser pickers, saves directly when the browser supports it, and otherwise downloads files. Recents depend on browser file-handle and IndexedDB support. A local backend is optional compatibility tooling only.
 - **Schema compatibility and readability:** keep additive fields under schema v1 only when old readers can safely ignore them. The editor rejects versions newer than v1 to avoid destructive saves. Prefer omitted defaults (`label`, `desc`, `labelPos`, table defaults, standard styles) and derived membership fields for readable, compact JSON. Fill colors must be one of the editor's 16 palette values; shape layer order is optional numeric `zIndex`.
-- **Editor shortcuts:** canvas focus supports copy/paste/cut (`Ctrl/Cmd+C/V/X`) and undo/redo. These should not intercept text editing in controls.
+- **Editor shortcuts:** focus the canvas, then use `Ctrl/Cmd+C`, `V`, `X`, `Z` to copy, paste, cut, undo; multi-selection copies all selected nodes and their internal edges. Shortcuts follow physical key positions and work with non-English keyboard layouts. Editable text fields keep native shortcuts. Other editor features include multi-select, fill palette, layers, standalone HTML export, JSON/PNG export, browser file open/save and best-effort recents.
 - **Keep the bundled editor in sync with the editor repo.** The skill vendors a copy of SEditor;
   `scripts/sync-editor.mjs` installs it checksum-verified, and `app/version.json` pins the release.
-  Never hand-edit `app/editor.html`: it is a build artifact from the SEditor repository and
-  every bundled file is checksum-pinned in `app/version.json`.
+  Never hand-edit generated HTML: it is built from the SEditor source. The repository's root `SEditor.html` is the primary standalone release; `app/editor.html` is its byte-identical compatibility copy used by the managed skill runtime. Managed app files are checksum-pinned in `version.json`.
 - **Never clobber generated or human files by default.** If the JSON or its same-name launcher already exists and the request is to create a new schema, ask before overwriting; if the request explicitly updates that schema, preserve its slug and pair.
 - **Keep the generated JSON much smaller than the editor can render.** A 200-node diagram
   is unreadable. Split into several named schemas instead.
 
 ## How the user opens it
 
-**Open the schema:** double click `.SEditor/<slug>.html`. Nothing else is required — the launcher
-carries the schema and opens `.SEditor/app/editor.html`. The optional backend adds recents,
-direct JSON/PNG disk writes, and the in-editor HTML button; keep `HOST` at `127.0.0.1` when using it:
-
-```bash
-cd <project-root>
-node .SEditor/app/server.js   # → http://127.0.0.1:5174/editor.html
-```
-
-`PORT` and `HOST` override the defaults (5174 / 127.0.0.1). The file API can write to any
-path on disk, so only bind `HOST=0.0.0.0` on a machine you trust.
+**Open the schema:** double click `.SEditor/<slug>.html`. It embeds the schema and loads the bundled single-file editor; no local server is required. Browser-native direct file access and recent-file support vary by browser; download/open pickers remain the fallback. The legacy local backend is optional and only needed by older integrations.
 
 Mention the launcher path on hand-off. For an existing project, preserve `.SEditor/` contents; only the managed `app/` runtime is synchronized.

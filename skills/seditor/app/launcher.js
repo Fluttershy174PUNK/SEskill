@@ -1,9 +1,4 @@
-// Чистый рендер HTML-ярлыка: одна реализация для Node (create-shortcut.mjs)
-// и для браузера (редактор перегенерирует ярлык при сохранении).
-// Никаких зависимостей от node:* — файл входит в автономную папку app/.
-//
-// Ярлык несёт данные схемы внутри себя и редиректит в общий app/editor.html:
-// так схема открывается двойным кликом (file://) без локального сервера.
+// Renders embedded-schema portable HTML exports and legacy file:// launchers without runtime dependencies.
 
 // Внутри <script> последовательность "<" закрывает элемент, поэтому в JSON
 // её всегда пишем как \u003c — JSON.parse вернёт исходный символ.
@@ -21,12 +16,23 @@ export const urlPath = (relative) =>
     .join('/');
 
 /** Подставить данные в шаблон app/shortcut.html. */
+export function renderStandaloneEditor(source, schema) {
+  const moduleScript = /<script type="module">/;
+  if (!source.includes('</body>') || !moduleScript.test(source) || !(source.match(/<script type="module">/g) || []).length) {
+    throw new Error('editor HTML must contain a bundled module script');
+  }
+  const data = inScript(JSON.stringify(schema));
+  const embedded = `<script type="application/json" id="seditor-schema">${data}</script><script id="seditor-bootstrap">window.__SEDITOR_INITIAL_SCHEMA__=JSON.parse(document.getElementById('seditor-schema').textContent);document.getElementById('seditor-schema').remove();</script>`;
+  return source.replace(moduleScript, `${embedded}<script type="module">`);
+}
+
 export function renderLauncher(template, { schema, name, editorUrl, schemaPathParam, editorSha, serverCommand }) {
+  const data = inScript(JSON.stringify(schema));
   return template
     .replaceAll('__SCHEME_NAME__', escapeHtml(name))
     .replaceAll('__SCHEME_PATH__', escapeHtml(decodeURIComponent(schemaPathParam)))
     .replaceAll('__SCHEME_PATH_PARAM__', inScript(JSON.stringify(schemaPathParam)))
-    .replaceAll('__SCHEME_JSON__', inScript(JSON.stringify(schema)))
+    .replaceAll('__SCHEME_JSON__', data)
     .replaceAll('__EDITOR_URL__', inScript(JSON.stringify(editorUrl)))
     .replaceAll('__EDITOR_REL__', escapeHtml(decodeURIComponent(editorUrl)))
     .replaceAll('__EDITOR_SHA256__', escapeHtml(editorSha))

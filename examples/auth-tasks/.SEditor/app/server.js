@@ -1,4 +1,4 @@
-// SEditor backend: отдаёт editor.html + файловый API для схем и PNG.
+// Optional legacy backend: serves SEditor.html plus disk APIs for schemas and PNG.
 // Зависимостей нет — только node:http/node:fs.
 import http from 'node:http';
 import fs from 'node:fs';
@@ -8,11 +8,11 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createShortcut } from './create-shortcut.mjs';
 
-// База — сам каталог app/: скопированная папка app/ работает автономно.
+// This optional backend lives in app/; the standalone UI is the repository-root SEditor.html.
 const APP = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = APP;
 const HOME = path.resolve(APP, '..');
-const EDITOR = path.join(APP, 'editor.html');
+const EDITOR = path.resolve(process.env.SEDITOR_HTML_ROOT || path.join(HOME, 'SEditor.html'));
 const PORT = Number(process.env.PORT || 5174);
 // Слушаем только localhost: файловый API отдаёт/пишет любые пути диска.
 // Для запуска «на сервере» задайте HOST=0.0.0.0 — но только на доверенной машине.
@@ -104,8 +104,15 @@ async function readBody(req) {
 async function serveStatic(req, res) {
   const url = new URL(req.url, 'http://localhost');
   const rel = decodeURIComponent(url.pathname);
-  // Ссылки на /assets/* в собранном файле не нужны, но пусть отдаются, если есть.
-  const file = rel === '/' || rel === '' || rel === '/editor.html' ? 'editor.html' : rel.slice(1);
+  // Canonical root page plus legacy app/editor.html aliases.
+  if (rel === '/' || rel === '' || rel === '/SEditor.html') {
+    const stat = await fsp.stat(EDITOR).catch(() => null);
+    if (!stat?.isFile()) return json(res, 404, { error: 'not found', hint: 'Run npm run build to create SEditor.html' });
+    res.writeHead(200, { 'content-type': MIME['.html'], 'cache-control': 'no-cache' });
+    fs.createReadStream(EDITOR).pipe(res);
+    return;
+  }
+  const file = rel === '/editor.html' ? 'editor.html' : rel.slice(1);
   const abs = resolveInside(file);
   const stat = abs && (await fsp.stat(abs).catch(() => null));
   if (!stat?.isFile()) {

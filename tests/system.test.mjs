@@ -109,11 +109,12 @@ try {
   await tests('editor: сборка содержит офлайн-загрузку, backend и создание ярлыков', async () => {
     const html = await readFile(path.join(appSrc, 'editor.html'), 'utf8');
     // Маркеры фич, которые появляются только после сборки новых исходников.
-    for (const marker of ['showDirectoryPicker', '#d=', 'seditor-schema', 'node .SEditor/app/server.js', 'Create']) {
+    for (const marker of ['showOpenFilePicker', 'showSaveFilePicker', '#d=', 'seditor-schema', 'Create']) {
       assert.ok(html.includes(marker) || html.includes(marker.toLowerCase()), `editor.html must contain "${marker}"`);
     }
     // Разбор hash — это контракт ярлыка; проверяем, что он есть в бандле.
     assert.match(html, /location\.hash\.replace\(\/\^#\//, 'editor must parse the launcher hash');
+    assert.match(html, /\.code\.slice\(3\)\.toLowerCase\(\)/, 'shortcut bundle must map physical letter keys independent of keyboard layout');
   });
 
   await tests('editor: контрольные суммы релиза совпадают с манифестом', async () => {
@@ -316,8 +317,10 @@ try {
       const html = await readFile(launcherPath, 'utf8');
       const { schema: baked } = parseRedirect(runLauncher(html).redirected, launcherPath);
       assert.deepEqual(baked.nodes, raw.nodes, `${file}: launcher must match its JSON`);
+      assert.equal(baked.meta.name, raw.meta.name, `${file}: launcher must embed current metadata`);
       const { editorPath } = parseRedirect(runLauncher(html).redirected, launcherPath);
       assert.equal(editorPath, path.join(dir, 'app/editor.html'), `${file}: redirect must target the bundled editor`);
+    assert.match(html, /seditor-schema/, `${file}: embedded schema must remain self-contained`);
     }
   });
 
@@ -325,7 +328,7 @@ try {
     const skill = await readFile(path.join(skillDir, 'SKILL.md'), 'utf8');
     const agents = await readFile(path.join(repoRoot, 'docs/vendoring.md'), 'utf8');
     assert.match(skill, /regenerate/i, 'SKILL.md must require launcher regeneration');
-    assert.match(skill, /embed-v1|встраива|embedded/i, 'SKILL.md must document embedded data');
+    assert.match(skill, /embed-v1|встраива|embedded|embeds/i, 'SKILL.md must document embedded data');
     assert.match(agents, /github\.com\/Fluttershy174PUNK\/SEditor/, 'vendoring.md must link the editor repo');
     assert.match(agents, /sync-editor\.mjs/, 'vendoring.md must document the sync path');
   });

@@ -91,7 +91,7 @@ else bad "SKILL.md body is $lines lines (>= 500, split it)"; fi
 
 # 5. Every bundled asset and script is actually referenced from the skill.
 for f in references/schema-format.md assets/example-scheme.json \
-         scripts/validate-scheme.mjs scripts/create-shortcut.mjs scripts/sync-editor.mjs \
+         scripts/validate-scheme.mjs scripts/validate-project.mjs scripts/create-shortcut.mjs scripts/sync-editor.mjs \
          app/version.json LICENSE; do
   if grep -q "$(basename "$f")" "$SKILL/SKILL.md" README.md tests/evals/README.md; then
     pass "referenced: $f"
@@ -103,8 +103,12 @@ done
 # 6. Real tests and eval workflow run.
 node "$SKILL/scripts/validate-scheme.mjs" --selfcheck >/dev/null \
   && pass "validator self-check" || bad "validator self-check"
+node "$SKILL/scripts/validate-project.mjs" examples/auth-tasks >/dev/null \
+  && pass "project schemas and launchers validate" || bad "project schemas and launchers validate"
 node tests/validate-scheme.test.mjs \
   && pass "schema validator black-box tests" || bad "schema validator black-box tests"
+node tests/validate-project.test.mjs \
+  && pass "project validator tests" || bad "project validator tests"
 node tests/shortcut.test.mjs \
   && pass "path-launcher and version-parity self-check" || bad "path-launcher and version-parity self-check"
 node tests/system.test.mjs \

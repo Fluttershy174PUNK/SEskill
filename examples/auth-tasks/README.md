@@ -59,8 +59,7 @@ The agent should produce the same shape of output that is already committed here
 ## Validate
 
 ```bash
-node ../../skills/seditor/scripts/validate-scheme.mjs .SEditor/*.json
-node ../../skills/seditor/scripts/validate-scheme.mjs --selfcheck
+node ../../skills/seditor/scripts/validate-project.mjs .
 ```
 
 Both must pass with exit code 0. The validator encodes the rules the bundled editor really
