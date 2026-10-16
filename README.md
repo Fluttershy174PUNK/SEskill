@@ -6,31 +6,55 @@ An Agent Skill that turns a project into a compact visual diagram, then pairs th
 
 ## Install
 
-**Recommended: install in the project repository** so the whole team gets the same skill. In Pi, copy the skill payload into the standard project-local location:
+A skill's **installation scope controls where the agent discovers it**, not where it writes project output. Whether installed globally or locally, when you run the agent in a project, SEskill reads that project and writes schemas, launchers, and the managed editor under that project's `SEditor/` directory (any other directory the user names works too). A global install does not redirect output to the skill's install folder.
 
-```bash
-mkdir -p .agents/skills
-cp -R /path/to/SEskill/skills/seditor .agents/skills/seditor
-```
+### Pi
 
-Pi discovers `.agents/skills/` from the project; use `/skill:seditor ...` to invoke it explicitly. Other compatible agents may use their own project-local skill directory (for example `.claude/skills/seditor` or `.github/skills/seditor`); copy the same `skills/seditor/` folder and preserve its name.
+Pi supports both package installs and skill directories ([skill discovery](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/skills.md), [package installs](https://github.com/badlogic/pi-mono/blob/main/packages/coding-agent/docs/packages.md)):
 
-**Optional: install globally in Pi** to use it across projects:
+| Scope | Command | Pi behavior |
+| --- | --- | --- |
+| Project (recommended for teams) | `pi install --local git:github.com/Fluttershy174PUNK/SEskill` | Records the package in the project's `.pi/settings.json`; project resources load after project trust is granted. |
+| Personal/global | `pi install git:github.com/Fluttershy174PUNK/SEskill` | Records the package in `~/.pi/agent/settings.json`; available across projects. |
 
-```bash
-pi install git:github.com/Fluttershy174PUNK/SEskill
-```
+This repository exposes the skill through its conventional `skills/seditor/` directory, so Pi's git package install makes it available. Alternatively, install just the raw skill folder: `.agents/skills/seditor/` in a project or `~/.agents/skills/seditor/` for personal use. Pi discovers both locations. Use `/skill:seditor ...` to invoke the skill explicitly.
 
-Project-local installation is preferred for project-specific setup and version control; global installation is convenient for personal reuse.
+### Other compatible agents
 
-Then ask your agent for a diagram, for example:
+Copy this repository's `skills/seditor/` directory (keep the destination folder named `seditor`) to the location supported by your agent. These locations are documented by [Claude Code](https://code.claude.com/docs/en/skills) and [GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-skills):
+
+| Agent | Project-local | Personal/global |
+| --- | --- | --- |
+| Claude Code | `.claude/skills/seditor/` | `~/.claude/skills/seditor/` |
+| Codex | `.agents/skills/seditor/` | See the current Codex documentation for user-level discovery paths; this README only confirms the project location. |
+| GitHub Copilot CLI | `.github/skills/seditor/` or `.agents/skills/seditor/` | `~/.copilot/skills/seditor/` or `~/.agents/skills/seditor/` |
+
+For example, after cloning this repository to `/path/to/SEskill`, from the project root install for Claude Code with `mkdir -p .claude/skills && cp -R /path/to/SEskill/skills/seditor .claude/skills/seditor`; for Codex or Copilot's `.agents` location, use `.agents/skills` as the destination instead. For a personal install, use the agent's personal path in the table, e.g. `mkdir -p ~/.claude/skills && cp -R /path/to/SEskill/skills/seditor ~/.claude/skills/seditor`.
+
+Project-local installs are easiest to share and version with a team. Personal/global installs are convenient for reuse; the skill still writes outputs into the active project's `SEditor/`.
+
+After installing, start the agent from the project directory so the skill inspects and writes to the correct project. Then ask for a diagram, for example:
 
 ```text
 /seditor map the authentication flow
 /seditor create a screen map for the checkout flow
 ```
 
-The skill inspects the project and creates `.SEditor/<type>-<topic>.json` plus a same-name `.html` launcher that embeds the schema and editor. Open that HTML file to edit the diagram; select a node and use `Ctrl/Cmd+C/V/X/Z` for copy, paste, cut, and undo. Node is only needed to generate and validate files.
+The skill inspects the project and creates `SEditor/<type>-<topic>.json` plus a same-name `.html` launcher that embeds the schema and editor. Open that HTML file to edit the diagram; select a node and use `Ctrl/Cmd+C/V/X/Z` for copy, paste, cut, and undo. Node is only needed to generate and validate files.
+
+## Output layout
+
+Everything the skill writes lives in one folder at the project root — `SEditor/` by default, or whatever directory the user names:
+
+```text
+SEditor/
+├── SEditor.html              # standalone editor copy — open it to edit any schema by hand
+├── app/                      # managed SEditor runtime (checksum-pinned, never hand-edited)
+├── <type>-<topic>.json       # the schema
+└── <type>-<topic>.html       # launcher: opens that schema by double click, offline
+```
+
+Projects created by skill ≤ 0.6 keep their `.SEditor/` folder; pass it explicitly to the scripts to keep working there.
 
 ## Schema and compatibility
 

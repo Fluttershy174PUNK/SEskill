@@ -1,13 +1,13 @@
 {
   "name": "SEditor",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "schemaVersion": 1,
   "launcherFormat": "embed-v1",
   "files": {
     "editor.html": "b586f611b94849d49dc2b28ca0720beff38e0f5f89a41d0e8b06d0be4c2205ad",
-    "server.js": "2359ecf53e630d5b71dbe0c6c7da7d55ac0cd8586abb154a5feae8bde4639b4b",
-    "create-shortcut.mjs": "9a5b95ed7af765b313fc4e6d916ee6ece4679c57796591e0b34e07a18f8eae42",
-    "shortcut.html": "8744ef771c9d391083a87257dde9dd39b7e9899e1bbd5ed4c605a55e0b966a43",
+    "server.js": "e270e6f8bc33c804cc99ffbe54de86fcb8b62e77d6e7028dbd255bb7a92a1962",
+    "create-shortcut.mjs": "cb8f918fdc7bc90d376cde399f917dff06113d450fde8df3a9ee8a1189ca45b8",
+    "shortcut.html": "68e15ae445719491292f8dbde44b8f17ce09831f7ad2ac77853bae97681bb0e9",
     "launcher.js": "04d233246c0d035e058ed724e9db22503625ba1b1f8d7f4de20ad271cd844d96"
   }
 }

@@ -32,7 +32,7 @@ try {
       continue;
     }
     const project = path.join(temp, item.id);
-    const schemas = path.join(project, '.SEditor');
+    const schemas = path.join(project, 'SEditor');
     const app = path.join(schemas, 'app');
     await mkdir(app, { recursive: true });
     const existingSchema = item.id === 'protect-existing-human-schema' ? 'data-model.json' : null;

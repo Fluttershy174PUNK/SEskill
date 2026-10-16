@@ -135,14 +135,14 @@ try {
   });
 
   await tests('editor: version.json одинаков во всех трёх местах', async () => {
-    const places = [path.join(appSrc, 'version.json'), path.join(skillApp, 'version.json'), path.join(repoRoot, 'examples/auth-tasks/.SEditor/app/version.json')];
+    const places = [path.join(appSrc, 'version.json'), path.join(skillApp, 'version.json'), path.join(repoRoot, 'examples/auth-tasks/SEditor/app/version.json')];
     const texts = await Promise.all(places.map((p) => readFile(p, 'utf8')));
     assert.equal(new Set(texts).size, 1, 'version manifest must be identical everywhere');
   });
 
   // ---------------------------------------------------------------- 2. ярлыки
   const hostileDir = path.join(temp, 'проект с пробелами & «кавычками»');
-  const launcherRel = '.SEditor/logic-auth-flow.json';
+  const launcherRel = 'SEditor/logic-auth-flow.json';
   const schemaAbs = path.join(hostileDir, launcherRel);
   const schema = {
     version: 1,
@@ -155,9 +155,9 @@ try {
     edges: [{ id: 'e1', source: 'n1', target: 'n2', sourceHandle: 'right', targetHandle: 'left', type: 'straight' }]
   };
 
-  await mkdir(path.join(hostileDir, '.SEditor/app'), { recursive: true });
+  await mkdir(path.join(hostileDir, 'SEditor/app'), { recursive: true });
   for (const file of RUNTIME_FILES) {
-    await writeFile(path.join(hostileDir, '.SEditor/app', file), await readFile(path.join(appSrc, file)));
+    await writeFile(path.join(hostileDir, 'SEditor/app', file), await readFile(path.join(appSrc, file)));
   }
   await writeFile(schemaAbs, JSON.stringify(schema, null, 2));
 
@@ -165,8 +165,8 @@ try {
   const generate = (which) =>
     new Promise((resolve, reject) => {
       const script = which === 'editor' ? path.join(appSrc, 'create-shortcut.mjs') : path.join(skillDir, 'scripts/create-shortcut.mjs');
-      const args = which === 'editor' ? [schemaAbs] : [schemaAbs, launcherAbs, path.join(hostileDir, '.SEditor/app/editor.html')];
-      const child = spawn(process.execPath, [script, ...args], { cwd: which === 'editor' ? path.join(hostileDir, '.SEditor/app') : hostileDir, stdio: 'ignore' });
+      const args = which === 'editor' ? [schemaAbs] : [schemaAbs, launcherAbs, path.join(hostileDir, 'SEditor/app/editor.html')];
+      const child = spawn(process.execPath, [script, ...args], { cwd: which === 'editor' ? path.join(hostileDir, 'SEditor/app') : hostileDir, stdio: 'ignore' });
       child.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`${which} generator exited ${code}`))));
     });
 
@@ -175,7 +175,7 @@ try {
     const html = await readFile(launcherAbs, 'utf8');
     const { redirected } = runLauncher(html);
     const { editorPath } = parseRedirect(redirected, launcherAbs);
-    assert.equal(editorPath, path.join(hostileDir, '.SEditor/app/editor.html'));
+    assert.equal(editorPath, path.join(hostileDir, 'SEditor/app/editor.html'));
     await readFile(editorPath); // файл обязан существовать
   });
 
@@ -211,7 +211,7 @@ try {
   await tests('ярлык: --check ловит устаревание и проходит после перегенерации', async () => {
     const checkLauncher = () =>
       new Promise((resolve) => {
-        const child = spawn(process.execPath, [path.join(skillDir, 'scripts/create-shortcut.mjs'), schemaAbs, launcherAbs, path.join(hostileDir, '.SEditor/app/editor.html'), '--check'], { cwd: hostileDir, stdio: 'ignore' });
+        const child = spawn(process.execPath, [path.join(skillDir, 'scripts/create-shortcut.mjs'), schemaAbs, launcherAbs, path.join(hostileDir, 'SEditor/app/editor.html'), '--check'], { cwd: hostileDir, stdio: 'ignore' });
         child.on('exit', (code) => resolve(code));
       });
     assert.equal(await checkLauncher(), 0, 'fresh launcher must pass --check');
@@ -226,16 +226,16 @@ try {
   const port = await unusedPort();
   const base = `http://127.0.0.1:${port}`;
   const projectRoot = path.join(temp, 'backend-demo');
-  await mkdir(path.join(projectRoot, '.SEditor/app'), { recursive: true });
+  await mkdir(path.join(projectRoot, 'SEditor/app'), { recursive: true });
   for (const file of [...RUNTIME_FILES, 'version.json']) {
-    await writeFile(path.join(projectRoot, '.SEditor/app', file), await readFile(path.join(appSrc, file)));
+    await writeFile(path.join(projectRoot, 'SEditor/app', file), await readFile(path.join(appSrc, file)));
   }
-  await writeFile(path.join(projectRoot, '.SEditor', 'demo-flow.json'), JSON.stringify(schema, null, 2));
+  await writeFile(path.join(projectRoot, 'SEditor', 'demo-flow.json'), JSON.stringify(schema, null, 2));
   await writeFile(path.join(projectRoot, 'secret.txt'), 'must not be served');
 
   let server;
   await tests('backend: статика, файловый API, runtime и защита ROOT', async () => {
-    server = spawn(process.execPath, [path.join(projectRoot, '.SEditor/app/server.js')], {
+    server = spawn(process.execPath, [path.join(projectRoot, 'SEditor/app/server.js')], {
       cwd: projectRoot,
       env: { ...process.env, HOST: '127.0.0.1', PORT: String(port) },
       stdio: 'ignore'
@@ -260,7 +260,7 @@ try {
     const next = { ...schema, meta: { name: 'demo-flow' }, nodes: [...schema.nodes, { id: 'n9', type: 'shape', position: { x: 900, y: 0 }, width: 160, height: 80, data: { shape: 'rect', label: 'Записан' } }] };
     const write = await fetch(`${base}/api/schema`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ path: '../demo-flow.json', data: next }) });
     assert.equal(write.status, 200);
-    const onDisk = JSON.parse(await readFile(path.join(projectRoot, '.SEditor', 'demo-flow.json'), 'utf8'));
+    const onDisk = JSON.parse(await readFile(path.join(projectRoot, 'SEditor', 'demo-flow.json'), 'utf8'));
     assert.equal(onDisk.nodes.length, next.nodes.length);
     assert.ok(onDisk.meta.updated, 'backend must stamp meta.updated');
 
@@ -268,9 +268,9 @@ try {
     const shortcut = await fetch(`${base}/api/shortcut`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ path: '../demo-flow.json' }) });
     assert.equal(shortcut.status, 200);
     assert.equal((await shortcut.json()).saved, true);
-    const served = await readFile(path.join(projectRoot, '.SEditor', 'demo-flow.html'), 'utf8');
-    const { editorPath } = parseRedirect(runLauncher(served).redirected, path.join(projectRoot, '.SEditor', 'demo-flow.html'));
-    assert.equal(editorPath, path.join(projectRoot, '.SEditor/app/editor.html'));
+    const served = await readFile(path.join(projectRoot, 'SEditor', 'demo-flow.html'), 'utf8');
+    const { editorPath } = parseRedirect(runLauncher(served).redirected, path.join(projectRoot, 'SEditor', 'demo-flow.html'));
+    assert.equal(editorPath, path.join(projectRoot, 'SEditor/app/editor.html'));
 
     // runtime отдаёт ровно запинованные файлы.
     const runtime = await (await fetch(`${base}/api/runtime`)).json();
@@ -290,22 +290,22 @@ try {
   // ---------------------------------------------------------------- 4. скилл
   await tests('скилл: sync-editor ставит рантайм, сохраняет пользовательские файлы', async () => {
     const project = path.join(temp, 'sync-demo');
-    await mkdir(path.join(project, '.SEditor/app'), { recursive: true });
-    await writeFile(path.join(project, '.SEditor/app/user-note.txt'), 'keep me');
-    await writeFile(path.join(project, '.SEditor/my-schema.json'), JSON.stringify(schema));
+    await mkdir(path.join(project, 'SEditor/app'), { recursive: true });
+    await writeFile(path.join(project, 'SEditor/app/user-note.txt'), 'keep me');
+    await writeFile(path.join(project, 'SEditor/my-schema.json'), JSON.stringify(schema));
     await new Promise((resolve, reject) => {
       const child = spawn(process.execPath, [path.join(skillDir, 'scripts/sync-editor.mjs'), project], { stdio: 'ignore' });
       child.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`sync exited ${code}`))));
     });
     for (const file of [...RUNTIME_FILES, 'version.json']) {
-      assert.deepEqual(await readFile(path.join(project, '.SEditor/app', file)), await readFile(path.join(appSrc, file)), `installed differs: ${file}`);
+      assert.deepEqual(await readFile(path.join(project, 'SEditor/app', file)), await readFile(path.join(appSrc, file)), `installed differs: ${file}`);
     }
-    assert.equal(await readFile(path.join(project, '.SEditor/app/user-note.txt'), 'utf8'), 'keep me', 'user file must survive');
-    assert.equal(JSON.parse(await readFile(path.join(project, '.SEditor/my-schema.json'), 'utf8')).nodes.length, schema.nodes.length, 'schema must survive');
+    assert.equal(await readFile(path.join(project, 'SEditor/app/user-note.txt'), 'utf8'), 'keep me', 'user file must survive');
+    assert.equal(JSON.parse(await readFile(path.join(project, 'SEditor/my-schema.json'), 'utf8')).nodes.length, schema.nodes.length, 'schema must survive');
   });
 
   await tests('скилл: каждая схема примера валидна и имеет парный ярлык с round-trip', async () => {
-    const dir = path.join(repoRoot, 'examples/auth-tasks/.SEditor');
+    const dir = path.join(repoRoot, 'examples/auth-tasks/SEditor');
     const schemas = (await readdir(dir)).filter((f) => f.endsWith('.json') && f !== 'version.json');
     assert.ok(schemas.length > 0, 'example must contain schemas');
     for (const file of schemas) {

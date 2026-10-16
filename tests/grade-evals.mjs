@@ -24,7 +24,7 @@ const report = [];
 let failures = 0;
 for (const item of evals.evals) {
   const outDir = path.join(root, item.id, 'outputs');
-  const schemasDir = path.join(outDir, '.SEditor');
+  const schemasDir = path.join(outDir, 'SEditor');
   let files = [];
   try { files = await readdir(schemasDir); } catch {}
   const jsons = files.filter((name) => name.endsWith('.json'));

@@ -4,7 +4,7 @@
     {
       "id": "logic-explicit",
       "prompt": "/seditor map login, password reset and 2FA flows",
-      "expected_output": "One valid logic schema and same-basename HTML path launcher in .SEditor; run the validator and explain backend launch.",
+      "expected_output": "One valid logic schema and same-basename HTML path launcher in SEditor/; run the validator and explain backend launch.",
       "assertions": ["Schema validates as SEditor v1", "Launcher is same-basename and references ../<slug>.json", "Launcher contains no schema JSON snapshot", "User is told how to launch local backend"]
     },
     {
@@ -27,7 +27,7 @@
     },
     {
       "id": "protect-existing-human-schema",
-      "prompt": "Create a data model for this project; .SEditor/data-model.json already exists and has manual edits.",
+      "prompt": "Create a data model for this project; SEditor/data-model.json already exists and has manual edits.",
       "expected_output": "Ask before overwriting the existing schema or select a new non-conflicting slug.",
       "assertions": ["Does not overwrite existing JSON or launcher without permission", "Keeps the existing editor bundle intact"]
     },
@@ -39,7 +39,7 @@
     },
     {
       "id": "stale-vendored-editor",
-      "prompt": "Add a deployment schema to a project whose .SEditor/app/version.json differs from the skill bundle.",
+      "prompt": "Add a deployment schema to a project whose SEditor/app/version.json differs from the skill bundle.",
       "expected_output": "Synchronize the bundled editor files as one version before creating the launcher.",
       "assertions": ["Detects manifest/version mismatch", "Updates the coherent editor bundle", "Creates path-based launcher and validates result"]
     },

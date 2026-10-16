@@ -4,10 +4,12 @@ import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { resolveOutputDir } from './sync-editor.mjs';
 
 const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const projectRoot = path.resolve(process.argv[2] || process.cwd());
-const schemaDir = path.join(projectRoot, '.SEditor');
+// Второй аргумент — каталог со схемами; по умолчанию SEditor/ (или legacy .SEditor/).
+const schemaDir = process.argv[3] ? path.resolve(projectRoot, process.argv[3]) : resolveOutputDir(projectRoot);
 let entries;
 try {
   entries = await readdir(schemaDir);
@@ -31,7 +33,7 @@ const paths = schemas.map((file) => path.join(schemaDir, file));
 let status = run('validate-scheme.mjs', paths);
 for (const schema of paths) {
   const launcher = schema.replace(/\.json$/i, '.html');
-  const result = run('create-shortcut.mjs', [schema, launcher, path.join(projectRoot, '.SEditor/app/editor.html'), '--check']);
+  const result = run('create-shortcut.mjs', [schema, launcher, path.join(schemaDir, 'app/editor.html'), '--check']);
   if (result) status = result;
 }
 if (!status) console.log(`ok    ${schemas.length} schema(s) and matching launcher(s)`);

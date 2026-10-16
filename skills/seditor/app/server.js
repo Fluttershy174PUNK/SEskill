@@ -20,7 +20,7 @@ const HOST = process.env.HOST || '127.0.0.1';
 const MAX_BODY = 64 * 1024 * 1024;
 
 // Папки со схемами для списка последних: сам app/, корень проекта рядом с ним
-// (в раскладке .SEditor/ схемы лежат рядом с app/) и catalog example_scheme/.
+// (в раскладке SEditor/ схемы лежат рядом с app/) и catalog example_scheme/.
 // Папка, которой нет, просто пропускается.
 const SCHEMA_DIRS = [...new Set([HOME, APP, path.join(HOME, 'example_scheme')])].filter((dir) => fs.existsSync(dir));
 // Служебные json (манифесты, конфиги) в списке схем не нужны.

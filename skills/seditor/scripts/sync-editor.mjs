@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// Install/update the managed .SEditor/app runtime files as one verified release.
+// Install/update the managed SEditor/app runtime files as one verified release.
 import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,7 +9,16 @@ import { fileURLToPath } from 'node:url';
 const skillDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const appDir = path.join(skillDir, 'app');
 
-export async function syncEditor(projectRoot, { sourceAppDir = appDir } = {}) {
+// Каталог вывода: <project-root>/SEditor, либо явно заданный пользователем,
+// либо legacy .SEditor (проекты, созданные скиллом до 0.7).
+export function resolveOutputDir(projectRoot, outDir) {
+  if (outDir) return path.resolve(projectRoot, outDir);
+  const modern = path.join(projectRoot, 'SEditor');
+  const legacy = path.join(projectRoot, '.SEditor');
+  return existsSync(modern) || !existsSync(legacy) ? modern : legacy;
+}
+
+export async function syncEditor(projectRoot, { sourceAppDir = appDir, outDir } = {}) {
   let manifest;
   try {
     manifest = JSON.parse(await readFile(path.join(sourceAppDir, 'version.json'), 'utf8'));
@@ -18,12 +28,13 @@ export async function syncEditor(projectRoot, { sourceAppDir = appDir } = {}) {
   if (manifest.name !== 'SEditor' || manifest.schemaVersion !== 1 || manifest.launcherFormat !== 'embed-v1') {
     throw new Error('unsupported SEditor app/version.json contract');
   }
-  const rootHtml = path.resolve(projectRoot, 'SEditor.html');
+  const outputDir = resolveOutputDir(projectRoot, outDir);
+  const rootHtml = path.join(outputDir, 'SEditor.html');
   const rootSource = await readFile(path.join(sourceAppDir, 'editor.html'));
   if (createHash('sha256').update(rootSource).digest('hex') !== manifest.files['editor.html']) {
     throw new Error('skill editor bundle checksum failed: editor.html');
   }
-  const targetDir = path.resolve(projectRoot, '.SEditor/app');
+  const targetDir = path.join(outputDir, 'app');
   const currentRoot = await readFile(rootHtml).catch(() => null);
   const previousEditor = await readFile(path.join(targetDir, 'editor.html')).catch(() => null);
   if (currentRoot && !currentRoot.equals(rootSource) && (!previousEditor || !currentRoot.equals(previousEditor))) {
@@ -62,10 +73,11 @@ export async function syncEditor(projectRoot, { sourceAppDir = appDir } = {}) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const projectRoot = process.argv[2] || process.cwd();
+  const [projectRootArg, outDirArg] = process.argv.slice(2);
+  const projectRoot = projectRootArg || process.cwd();
   try {
-    const result = await syncEditor(projectRoot);
-    console.log(`SEditor ${result.version} installed: ${result.targetDir} and ${path.resolve(projectRoot, 'SEditor.html')}`);
+    const result = await syncEditor(projectRoot, { outDir: outDirArg });
+    console.log(`SEditor ${result.version} installed: ${result.targetDir} and ${path.join(result.targetDir, '..', 'SEditor.html')}`);
   } catch (error) {
     console.error(error.message);
     process.exit(1);

@@ -12,11 +12,13 @@ hand-edited hybrid.
 - `skills/seditor/app/version.json` pins the release: version, `launcherFormat` and a
   sha256 for each of the five managed runtime files (`editor.html`, `server.js`,
   `create-shortcut.mjs`, `shortcut.html`, `launcher.js`). `editor.html` is a
-  byte-identical copy of the primary root `SEditor.html`; build configs and tests stay
-  in the SEditor repo.
-- `skills/seditor/scripts/sync-editor.mjs <project-root>` installs the bundle
-  checksum-verified into `<project-root>/.SEditor/app/` and writes the standalone
-  `SEditor.html` at the project root. It updates only the managed runtime/root HTML and
+  byte-identical copy of the primary root `SEditor.html` in the editor repo; build
+  configs and tests stay in the SEditor repo.
+- `skills/seditor/scripts/sync-editor.mjs <project-root> [output-dir]` installs the bundle
+  checksum-verified into `<output-dir>/app/` and writes the standalone `SEditor.html`
+  alongside it. The output dir defaults to `<project-root>/SEditor/` (a legacy
+  `<project-root>/.SEditor/` is kept until the user migrates; an explicit second argument
+  selects a custom directory). It updates only the managed runtime/root HTML and
   never touches schemas, launchers or unrelated user files.
 - `bash verify.sh` (repo root) checks the vendored bundle against the SEditor source
   checkout (sibling clone by default, or `SEditor_ROOT=/path/to/SEditor`) and
@@ -31,10 +33,11 @@ hand-edited hybrid.
    only when the launcher format itself changes (currently `embed-v1`).
 3. Copy the five runtime files plus `version.json` from `SEditor/app/` into
    `skills/seditor/app/`.
-4. Copy the five runtime files plus `version.json` from `SEditor/app/` into both
-   `skills/seditor/app/` and `examples/auth-tasks/.SEditor/app/`. Update the vendored
-   schema reference from `SEditor/docs/schema-format.md`.
-5. Re-sync the checked-in demo and regenerate launchers for its demo schemas.
+4. Copy the five runtime files plus `version.json` from `SEditor/app/` into
+   `skills/seditor/app/`. Update the vendored schema reference from
+   `SEditor/docs/schema-format.md`.
+5. Re-sync the checked-in demo (`node skills/seditor/scripts/sync-editor.mjs examples/auth-tasks`)
+   and regenerate launchers for its demo schemas.
 6. Run `bash verify.sh` from the repo root and fix everything it reports.
 
 Do not edit `skills/seditor/app/editor.html` by hand — it is a build artifact. Fix

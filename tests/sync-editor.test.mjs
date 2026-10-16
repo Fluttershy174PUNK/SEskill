@@ -12,7 +12,7 @@ const skillDir = path.join(repoRoot, 'skills/seditor');
 const temp = await mkdtemp(path.join(os.tmpdir(), 'seditor-sync-test-'));
 try {
   const project = path.join(temp, 'project');
-  const staleApp = path.join(project, '.SEditor/app');
+  const staleApp = path.join(project, 'SEditor/app');
   await mkdir(staleApp, { recursive: true });
   await writeFile(path.join(staleApp, 'old-editor.js'), 'user-owned file');
   await writeFile(path.join(staleApp, 'editor.html'), 'old version');
@@ -21,7 +21,7 @@ try {
   const manifest = JSON.parse(await readFile(path.join(skillDir, 'app', 'version.json'), 'utf8'));
   assert.equal(first.version, manifest.version);
   assert.equal(first.changed, true);
-  assert.deepEqual(await readFile(path.join(project, 'SEditor.html')), await readFile(path.join(skillDir, 'app/editor.html')));
+  assert.deepEqual(await readFile(path.join(project, 'SEditor', 'SEditor.html')), await readFile(path.join(skillDir, 'app/editor.html')));
   for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'version.json']) {
     assert.deepEqual(await readFile(path.join(staleApp, file)), await readFile(path.join(skillDir, 'app', file)));
   }
@@ -34,7 +34,7 @@ try {
   const second = await syncEditor(project);
   assert.equal(second.changed, false, 'same version and runtime are idempotent');
   assert.equal(await readFile(path.join(staleApp, 'version.json'), 'utf8'), installedManifest);
-  const rootHtml = path.join(project, 'SEditor.html');
+  const rootHtml = path.join(project, 'SEditor', 'SEditor.html');
   const managedFiles = ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js', 'version.json'];
   await writeFile(path.join(staleApp, 'version.json'), '{"version":"0.4.0"}');
   const runtimeBeforeConflict = await Promise.all(managedFiles.map((file) => readFile(path.join(staleApp, file))));
@@ -48,6 +48,17 @@ try {
   assert.equal(upgraded.changed, true, 'upgrade a previously managed root HTML');
   assert.deepEqual(await readFile(rootHtml), await readFile(path.join(skillDir, 'app/editor.html')));
 
+  // Пользовательский каталог и legacy .SEditor: вывод настраивается, старые проекты не ломаются.
+  const custom = path.join(temp, 'custom');
+  await syncEditor(custom, { outDir: 'docs/diagrams' });
+  await readFile(path.join(custom, 'docs/diagrams/SEditor.html'));
+  await readFile(path.join(custom, 'docs/diagrams/app/editor.html'));
+  const legacy = path.join(temp, 'legacy');
+  await mkdir(path.join(legacy, '.SEditor/app'), { recursive: true });
+  await syncEditor(legacy);
+  await readFile(path.join(legacy, '.SEditor/app/editor.html'));
+  await readFile(path.join(legacy, '.SEditor/SEditor.html'));
+
   const broken = path.join(temp, 'broken-bundle');
   await mkdir(broken, { recursive: true });
   await cp(path.join(skillDir, 'app'), broken, { recursive: true });
@@ -55,7 +66,7 @@ try {
   await cp(path.join(skillDir, 'app/editor.html'), path.join(broken, 'editor.html'));
   await writeFile(path.join(broken, 'editor.html'), 'tampered bundle');
   await assert.rejects(syncEditor(project, { sourceAppDir: broken }), /checksum failed/);
-  console.log('sync-editor.test.mjs: upgrade, idempotence, user-file preservation, and checksum rejection passed');
+  console.log('sync-editor.test.mjs: upgrade, idempotence, custom dir, legacy dir, user-file preservation, and checksum rejection passed');
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

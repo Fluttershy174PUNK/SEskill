@@ -27,6 +27,8 @@ export async function renderShortcut(schemaPath, { appDir = process.cwd(), name:
   const editorUrl = urlPath(path.relative(path.dirname(launcherAbs), editorAbs));
   // Путь схемы берём сырым: ярлык сам кодирует его в query (encodeURIComponent).
   const schemaParam = path.relative(appDir, abs).split(path.sep).join('/');
+  // Подсказка для сервера — путь от папки самого ярлыка: верна при любой раскладке.
+  const serverRel = path.relative(path.dirname(launcherAbs), path.join(appDir, 'server.js')).split(path.sep).join('/');
   const editorSha = createHash('sha256').update(await readFile(editorAbs)).digest('hex');
 
   const template = await readFile(path.join(APP, 'shortcut.html'), 'utf8');
@@ -36,7 +38,7 @@ export async function renderShortcut(schemaPath, { appDir = process.cwd(), name:
     editorUrl,
     schemaPathParam: schemaParam,
     editorSha,
-    serverCommand: 'node .SEditor/app/server.js'
+    serverCommand: `node ${serverRel}`
   });
 }
 

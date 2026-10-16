@@ -123,26 +123,26 @@ node tests/run-evals.mjs \
   && pass "output-eval scenarios in isolated projects" || bad "output-eval scenarios in isolated projects"
 
 # 7. Every example schema has a same-basename path launcher.
-for schema in examples/auth-tasks/.SEditor/*.json "$SKILL/assets/example-scheme.json"; do
+for schema in examples/auth-tasks/SEditor/*.json "$SKILL/assets/example-scheme.json"; do
   slug=${schema%.json}
   launcher="$slug.html"
   if [[ "$schema" == "$SKILL"/assets/* ]]; then editor="$SKILL/app/editor.html"
-  else editor=examples/auth-tasks/.SEditor/app/editor.html; fi
+  else editor=examples/auth-tasks/SEditor/app/editor.html; fi
   node "$SKILL/scripts/create-shortcut.mjs" "$schema" "$launcher" "$editor" --check \
     && pass "path launcher: $launcher" || bad "path launcher: $launcher"
 done
 
 # 8. Every generated schema validates, and has a launcher pointing at it.
-if compgen -G "examples/auth-tasks/.SEditor/*.json" > /dev/null; then
-  node "$SKILL/scripts/validate-scheme.mjs" examples/auth-tasks/.SEditor/*.json \
+if compgen -G "examples/auth-tasks/SEditor/*.json" > /dev/null; then
+  node "$SKILL/scripts/validate-scheme.mjs" examples/auth-tasks/SEditor/*.json \
     && pass "example schemas valid" || bad "example schemas"
-  for j in examples/auth-tasks/.SEditor/*.json; do
+  for j in examples/auth-tasks/SEditor/*.json; do
     slug=$(basename "$j" .json)
-    html="examples/auth-tasks/.SEditor/$slug.html"
+    html="examples/auth-tasks/SEditor/$slug.html"
     if [ -f "$html" ] && grep -q "$slug" "$html"; then pass "launcher: $slug.html"
     else bad "missing or wrong launcher for $slug"; fi
   done
-  for j in examples/auth-tasks/.SEditor/*.json; do
+  for j in examples/auth-tasks/SEditor/*.json; do
     node -e '
 const fs = require("fs");
 const s = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
@@ -153,14 +153,14 @@ if (s.meta.name !== require("path").basename(process.argv[1], ".json")) {
 ' "$j" && pass "meta.name matches filename: $(basename "$j")" || bad "meta.name: $(basename "$j")"
   done
 else
-  bad "no example schemas found in examples/auth-tasks/.SEditor/"
+  bad "no example schemas found in examples/auth-tasks/SEditor/"
 fi
 
 # 9. The vendored editor is complete.
 for f in editor.html server.js create-shortcut.mjs shortcut.html version.json; do
   [ -s "$SKILL/app/$f" ] && pass "vendored: $f" || bad "missing: $SKILL/app/$f"
 done
-[ -d examples/auth-tasks/.SEditor/app ] && pass "example has .SEditor/app/" || bad "example missing .SEditor/app/"
+[ -d examples/auth-tasks/SEditor/app ] && pass "example has SEditor/app/" || bad "example missing SEditor/app/"
 
 echo
 if [ "$fail" -eq 0 ]; then echo "all checks passed"; else echo "some checks FAILED"; fi

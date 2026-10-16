@@ -1,16 +1,17 @@
-# `.SEditor` в этом проекте
+# `SEditor/` в этом проекте
 
 Пример вывода навыка `/seditor`: схемы SEditor v1, один HTML-ярлык на схему и общий
 рантайм редактора.
 
 ## Открыть схему
 
-Двойной клик по `.SEditor/<slug>.html`. Больше ничего не нужно — ярлык несёт данные
-схемы и открывает редактор из `.SEditor/app/editor.html` напрямую (`file://`).
+Двойной клик по `SEditor/<slug>.html`. Больше ничего не нужно — ярлык несёт данные
+схемы и открывает редактор из `SEditor/app/editor.html` напрямую (`file://`).
+Для ручной правки любой схемы откройте `SEditor/SEditor.html` — автономную копию редактора.
 
 ## Опциональный сервер
 
-`node .SEditor/app/server.js` добавляет: список последних схем, сохранение JSON/PNG
+`node SEditor/app/server.js` добавляет: список последних схем, сохранение JSON/PNG
 сразу на диск и кнопку создания ярлыка внутри редактора. Без сервера редактор всё
 равно умеет сохранять JSON и PNG в папку, выбранную один раз (File System Access API).
 
@@ -21,7 +22,7 @@
 ярлык нужно перегенерировать** — навык делает это последним шагом каждой правки:
 
 ```bash
-node <skill-dir>/scripts/create-shortcut.mjs .SEditor/<slug>.json .SEditor/<slug>.html .SEditor/app/editor.html
+node <skill-dir>/scripts/create-shortcut.mjs SEditor/<slug>.json SEditor/<slug>.html SEditor/app/editor.html
 ```
 
 Проверка соответствия и всех схем: `bash verify.sh` из корня репозитория навыка.

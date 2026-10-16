@@ -41,7 +41,7 @@ try { manifest = JSON.parse(await readFile(path.join(skillDir, 'app/version.json
   errors.push(`app/version.json invalid: ${error.message}`);
   manifest = { files: {} };
 }
-check(manifest.name === 'SEditor' && manifest.version === '0.6.0' && manifest.schemaVersion === 1 && manifest.launcherFormat === 'embed-v1', 'editor manifest contract mismatch');
+check(manifest.name === 'SEditor' && manifest.version === '0.7.0' && manifest.schemaVersion === 1 && manifest.launcherFormat === 'embed-v1', 'editor manifest contract mismatch');
 for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js']) {
   const bundled = await readFile(path.join(skillDir, 'app', file));
   const hash = createHash('sha256').update(bundled).digest('hex');
@@ -74,7 +74,7 @@ const projectValidator = await readFile(path.join(skillDir, 'scripts/validate-pr
 check(projectValidator.includes('validate-scheme.mjs') && projectValidator.includes('--check'), 'project validator should combine schema and launcher freshness checks');
 
 const examples = [
-  path.join(repoRoot, 'examples/auth-tasks/.SEditor'),
+  path.join(repoRoot, 'examples/auth-tasks/SEditor'),
   path.join(skillDir, 'assets')
 ];
 for (const directory of examples) {

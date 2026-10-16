@@ -38,12 +38,12 @@ async function waitFor(url, child) {
 
 try {
   const project = path.join(temp, 'demo');
-  const editorDir = path.join(project, '.SEditor', 'app');
+  const editorDir = path.join(project, 'SEditor', 'app');
   await mkdir(editorDir, { recursive: true });
   for (const file of ['editor.html', 'server.js', 'create-shortcut.mjs', 'shortcut.html', 'launcher.js']) {
     await writeFile(path.join(editorDir, file), await readFile(path.join(skillDir, 'app', file)));
   }
-  const schemaRel = '.SEditor/logic-demo.json';
+  const schemaRel = 'SEditor/logic-demo.json';
   const schemaPath = path.join(project, schemaRel);
   const schema = {
     version: 1,
@@ -53,9 +53,9 @@ try {
   };
   await writeFile(schemaPath, JSON.stringify(schema, null, 2));
 
-  const generated = spawn(process.execPath, [path.join(skillDir, 'scripts/create-shortcut.mjs'), schemaPath, path.join(project, '.SEditor/logic-demo.html'), path.join(editorDir, 'editor.html')], { cwd: project, stdio: 'ignore' });
+  const generated = spawn(process.execPath, [path.join(skillDir, 'scripts/create-shortcut.mjs'), schemaPath, path.join(project, 'SEditor/logic-demo.html'), path.join(editorDir, 'editor.html')], { cwd: project, stdio: 'ignore' });
   assert.equal((await once(generated, 'exit'))[0], 0, 'skill launcher generator exits successfully');
-  const launcherPath = path.join(project, '.SEditor/logic-demo.html');
+  const launcherPath = path.join(project, 'SEditor/logic-demo.html');
   const launcherBeforeUpdate = await readFile(launcherPath, 'utf8');
   // Ярлык несёт схему внутри (offline-открытие) и кодирует путь схемы.
   assert.match(launcherBeforeUpdate, /id="seditor-schema">/);
